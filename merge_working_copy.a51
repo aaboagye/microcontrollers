@@ -1,14 +1,3 @@
-merge(in1,in2,out):
-while both in1 and in2 contains items:
-  if in1[0] < in2[0]:
-    out.append (in1[0])
-    remove in1[0]
-  else:
-    out.append (in2[0])
-    remove in2[0]
-append any remaining items to out
-
-
                 MOV     R0,#list1
                 MOV     R1,#list2
                 MOV     R7,#size
