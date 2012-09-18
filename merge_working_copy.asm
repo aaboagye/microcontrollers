@@ -20,12 +20,12 @@ merge:          mov a,r7
                 ; i = index of last item in list 1
                 ; j = index of last item in list 2
                 ; k = index of last item in original list
-
+                mov a,r6
                 add a,#list1        ;this is i.
                 dec a
                 mov r5,a            ;store i.
                 mov a,#list2
-                add a,r6
+                add a,r2
                 dec a
                 mov r4,a            ;storing j.
                 mov a,r5
