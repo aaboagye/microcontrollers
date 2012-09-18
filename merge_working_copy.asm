@@ -10,8 +10,11 @@
                 lcall merge
 
 merge:          mov a,r7
-                rrc a               ;determine the size of each half
+                rrc a               ;determine the size of left half
                 mov r6,a            ;store this in another register
+                mov a,r7
+                subb a,r6           ;right half = total - left
+                mov r2,a            ;determine the size of the right half and store it.
 
                 ;need 3 iterators:
                 ; i = index of last item in list 1
@@ -57,10 +60,9 @@ store_list1:    push ar0            ;saving list 1
                 pop ar0
                 mov a,r0
                 mov @r1,a           ;stored the value in the original list
-                mov a,r5
-                dec a
-                mov r5,a            ;decrement i
-next:           mov a,r3
-                dec a
-                mov r3,a            ;decrement the original list pointer.
-                jmp loop
+                dec r5              ;decrement i
+                dec r6              ;decrement count in i
+next:           dec r3              ;decrement the original list pointer.
+                djnz r7,continue    ;keeping track of how many items we have stored.
+                sjmp $
+continue:       jmp loop
