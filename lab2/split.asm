@@ -1,16 +1,19 @@
 ;split(list, sizeof(list))
 ;
 ;size   :r7     
-                mov     r1,30h
-                mov     r7,8
-                mov     r0,20h
+                mov     r1,#30h
+                mov     r7,#8
+                mov     r0,#20h
                 push    ar1
                 push    ar0
                 push    ar7
                 lcall   split
                 sjmp    $
 
-split:          pop     ar7
+split:          mov     a,sp
+                add     a,#-2
+                mov     sp,a
+                pop     ar7
                 cjne    r7,#1,else          ;if list has a size of 1 return.
                 ret
 else:           mov     r6,ar7              ;else, copy the right side of the list
@@ -21,6 +24,9 @@ else:           mov     r6,ar7              ;else, copy the right side of the li
                 mov     r5,ar6
                 dec     r6                  ;address of the end of left
                 pop     ar0
+                mov     a,r7
+                add     a,r0
+                mov     r7,a
                 mov     a,r0
                 add     a,r6
                 mov     r0,a
@@ -30,7 +36,7 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 mov     @r1,a
                 inc     r1
                 inc     r0
-                mov     a,r0
+                mov     a,r5
                 cjne    a,ar7,r_toscratch
                 push    ar1                 ;scratch index
                 push    ar0                 ;list index
