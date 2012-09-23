@@ -36,7 +36,7 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 mov     @r1,a
                 inc     r1
                 inc     r0
-                mov     a,r5
+                mov     a,r0
                 cjne    a,ar7,r_toscratch
                 push    ar1                 ;scratch index
                 push    ar0                 ;list index
