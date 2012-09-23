@@ -1,6 +1,7 @@
 ;split(list, sizeof(list))
 ;
-;size   :r7     mov     r1,30h
+;size   :r7     
+                mov     r1,30h
                 mov     r7,8
                 mov     r0,20h
                 push    ar1
@@ -14,7 +15,9 @@ split:          pop     ar7
                 ret
 else:           mov     r6,ar7              ;else, copy the right side of the list
                 clr     c                   ;to the scratch space
-                rrc     r6
+                mov     a,r6
+                rrc     a
+                mov     r6,a
                 mov     r5,ar6
                 dec     r6                  ;address of the end of left
                 pop     ar0
@@ -27,7 +30,8 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 mov     @r1,a
                 inc     r1
                 inc     r0
-                cjne    r0,ar7,r_toscratch
+                mov     a,r0
+                cjne    a,ar7,r_toscratch
                 push    ar1                 ;scratch index
                 push    ar0                 ;list index
                 push    ar5                 ;size
@@ -49,7 +53,10 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 lcall   merge
                 ret
 
-merge:          mov     a,r7
+merge:          pop     ar7
+                pop     ar1             ;right
+                pop     ar0             ;left
+                mov     a,r7
                 rrc     a               ;determine the size of left half
                 mov     r6,a            ;store this in another register
                 mov     a,r7
@@ -63,12 +70,12 @@ merge:          mov     a,r7
                 ; k = index of last item in original list
                 
                 mov     a,r6
-                add     a,#left         ;this is i.
+                add     a,r0         ;this is i.
                 dec     a
                 mov     r5,a            ;store i.
                 add     a,r2
                 mov     r3,a            ;storing k.
-                mov     a,#right
+                mov     a,r1
                 add     a,r2
                 dec     a
                 mov     r4,a            ;storing j.
