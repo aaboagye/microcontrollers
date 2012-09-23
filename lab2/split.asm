@@ -1,9 +1,12 @@
 ;split(list, sizeof(list))
 ;
 ;size   :r7     
+                offset  equ 10h
+                mov     offset,#2
                 mov     r1,#30h
                 mov     r7,#8
                 mov     r0,#20h
+                mov     sp,#4fh
                 push    ar1
                 push    ar0
                 push    ar7
@@ -11,10 +14,15 @@
                 sjmp    $
 
 split:          mov     a,sp
-                add     a,#-2
+                clr     c
+                subb    a,offset
                 mov     sp,a
                 pop     ar7
                 cjne    r7,#1,else          ;if list has a size of 1 return.
+                inc     sp                  ;undo the pop we just did to check
+                mov     a,sp
+                add     a,offset
+                mov     sp,a
                 ret
 else:           mov     r6,ar7              ;else, copy the right side of the list
                 clr     c                   ;to the scratch space
@@ -31,6 +39,7 @@ else:           mov     r6,ar7              ;else, copy the right side of the li
                 add     a,r6
                 mov     r0,a
                 inc     r0
+                mov     r2,ar0
                 pop     ar1
 r_toscratch:    mov     a,@r0               ;copy the right side of the list into the scratch space.
                 mov     @r1,a
@@ -39,8 +48,13 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 mov     a,r0
                 cjne    a,ar7,r_toscratch
                 push    ar1                 ;scratch index
-                push    ar0                 ;list index
+                push    ar2                 ;list index
                 push    ar5                 ;size
+                mov     a,sp
+                add     a,offset
+                mov     sp,a
+                inc     offset
+                inc     offset
                 lcall   split
                 ;here after it has split the left side, it needs to do the same to the right side.
                 push    ar1                     ;scratch
