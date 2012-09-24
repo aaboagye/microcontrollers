@@ -84,13 +84,17 @@ else:           mov     r6,ar7              ;else, copy the right side of the li
                 mov     a,r6
                 rrc     a
                 mov     r6,a
+                mov     a,r7
+                clr     c
+                subb    a,r6
+                mov     r3,a                ;size - size/2
                 mov     r5,ar6
                 dec     r6                  ;address of the end of left
                 pop     ar0
                 mov     r2,ar0
                 mov     a,r7
                 add     a,r0
-                mov     r7,a
+                mov     r4,a
                 mov     a,r0
                 add     a,r6
                 mov     r0,a
@@ -101,7 +105,7 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 inc     r1
                 inc     r0
                 mov     a,r0
-                cjne    a,ar7,r_toscratch
+                cjne    a,ar4,r_toscratch
                 push    ar1                 ;scratch index
                 push    ar2                 ;list index
                 push    ar5                 ;size
@@ -120,13 +124,13 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 mov     a,r1
                 subb    a,r6
                 push    acc                     ;address of right list
-                push    ar6                     ;size of right list
-                mov     offset,#2               ;resetting the offset
-                mov     a,sp
-                add     a,offset
-                mov     sp,a
-                inc     offset
-                inc     offset
+                push    ar3                     ;size of right list
+               ; mov     offset,#2               ;resetting the offset
+                ;mov     a,sp
+                ;add     a,offset
+                ;mov     sp,a
+                ;inc     offset
+                ;inc     offset
                 lcall   split
                 mov     offset,#2
                 mov     a,sp
