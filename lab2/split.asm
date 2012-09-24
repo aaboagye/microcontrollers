@@ -3,10 +3,6 @@
 ;size   :r7     
                 offset  equ 10h
                 mov     offset,#2
-                mov     r1,#30h
-                mov     r7,#8
-                mov     r0,#20h
-                mov     sp,#4fh
                 push    ar1
                 push    ar0
                 push    ar7
@@ -35,7 +31,7 @@ else:           mov     r6,ar7              ;else, copy the right side of the li
                 mov     r2,ar0
                 mov     a,r7
                 add     a,r0
-                mov     r7,a
+                mov     r4,a                ;address at end of the array
                 mov     a,r0
                 add     a,r6
                 mov     r0,a
@@ -46,7 +42,7 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 inc     r1
                 inc     r0
                 mov     a,r0
-                cjne    a,ar7,r_toscratch
+                cjne    a,ar4,r_toscratch
                 push    ar1                 ;scratch index
                 push    ar2                 ;list index
                 push    ar5                 ;size

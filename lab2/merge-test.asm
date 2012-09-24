@@ -57,15 +57,11 @@ clr2:   mov     @r0,# 0eeH
         sjmp    $
 
 mergesort:
-;split(list, sizeof(list))
+;split(list, sizeof(list), scratch)
 ;
 ;size   :r7     
                 offset  equ 10h
                 mov     offset,#2
-;                mov     r1,#30h
-;                mov     r7,#4
-;                mov     r0,#20h
-;                mov     sp,#4fh
                 push    ar1
                 push    ar0
                 push    ar7
