@@ -62,10 +62,10 @@ mergesort:
 ;size   :r7     
                 offset  equ 10h
                 mov     offset,#2
-                mov     r1,#30h
-                mov     r7,#8
-                mov     r0,#20h
-                mov     sp,#4fh
+;                mov     r1,#30h
+;                mov     r7,#4
+;                mov     r0,#20h
+;                mov     sp,#4fh
                 push    ar1
                 push    ar0
                 push    ar7
@@ -91,6 +91,7 @@ else:           mov     r6,ar7              ;else, copy the right side of the li
                 mov     r5,ar6
                 dec     r6                  ;address of the end of left
                 pop     ar0
+                mov     r2,ar0
                 mov     a,r7
                 add     a,r0
                 mov     r7,a
@@ -98,7 +99,6 @@ else:           mov     r6,ar7              ;else, copy the right side of the li
                 add     a,r6
                 mov     r0,a
                 inc     r0
-                mov     r2,ar0
                 pop     ar1
 r_toscratch:    mov     a,@r0               ;copy the right side of the list into the scratch space.
                 mov     @r1,a
@@ -117,22 +117,51 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 lcall   split
                 ;here after it has split the left side, it needs to do the same to the right side.
                 push    ar1                     ;scratch
+                ;dec     ar1
+                mov     a,r7
+                add     a,r5
+                mov     r6,a
+                mov     a,r1
+                subb    a,r6
+                push    acc                     ;address of right list
+                push    ar6                     ;size of right list
+                mov     offset,#2               ;resetting the offset
+                mov     a,sp
+                add     a,offset
+                mov     sp,a
+                inc     offset
+                inc     offset
+                lcall   split
+                mov     offset,#2
+                mov     a,sp
+                clr     c
+                subb    a,offset
+                mov     sp,a
+                pop     ar0                     ;removing size of right list
+                pop     ar5                     ;addr of right list
+                ;pop     acc                     ;scratch loc
+;here we must place: left addr, right addr, total size then call merge
+                push    ar2
                 push    ar5                     ;address of right list
                 mov     a,r7
-                clr     c
-                subb    a,r5
-                push    acc                     ;size of right list
-                lcall split
-                pop     acc                     ;removing size of right list
-                pop     ar5                     ;addr of right list
-                pop     acc                     ;scratch loc
-                pop     acc                     ;size left list?
-                push    ar5
-                push    ar7
+                add     a,r0
+                push    acc
+               ; inc     offset
+               ; inc     offset
                 lcall   merge
+                dec     sp
+                dec     sp
+                dec     sp
+                pop     acc
+                mov     r1,a
                 ret
 
-merge:          pop     ar7
+merge:          ;here i need to move the SP accordingly
+                mov     a,sp
+                clr     c
+                subb    a,offset
+                mov     sp,a
+                pop     ar7             ;size
                 pop     ar1             ;right
                 pop     ar0             ;left
                 mov     a,r7
@@ -149,7 +178,7 @@ merge:          pop     ar7
                 ; k = index of last item in original list
                 
                 mov     a,r6
-                add     a,r0         ;this is i.
+                add     a,r0            ;this is i.
                 dec     a
                 mov     r5,a            ;store i.
                 add     a,r2
@@ -185,4 +214,10 @@ copy_right:     mov     r0,ar4
                 dec     r3
                 dec     r4
                 djnz    r2,copy_right
-halt:           ret
+halt:           inc     sp
+                inc     sp
+                inc     sp
+                mov     a,sp
+                add     a,offset
+                mov     sp,a
+                ret
