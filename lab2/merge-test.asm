@@ -125,35 +125,34 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 subb    a,r6
                 push    acc                     ;address of right list
                 push    ar3                     ;size of right list
-               ; mov     offset,#2               ;resetting the offset
+                mov     offset,#2               ;resetting the offset
                 ;mov     a,sp
                 ;add     a,offset
                 ;mov     sp,a
                 ;inc     offset
                 ;inc     offset
                 lcall   split
-                mov     offset,#2
-                mov     a,sp
-                clr     c
-                subb    a,offset
-                mov     sp,a
+                ;mov     offset,#2
+                ;mov     a,sp
+                ;clr     c
+                ;subb    a,offset
+                ;mov     sp,a
                 pop     ar0                     ;removing size of right list
                 pop     ar5                     ;addr of right list
                 ;pop     acc                     ;scratch loc
 ;here we must place: left addr, right addr, total size then call merge
                 push    ar2
-                push    ar5                     ;address of right list
+                push    ar4                     ;address of right list
                 mov     a,r7
-                add     a,r0
+                add     a,r3
                 push    acc
                ; inc     offset
                ; inc     offset
                 lcall   merge
                 dec     sp
                 dec     sp
+                pop     ar2
                 dec     sp
-                pop     acc
-                mov     r1,a
                 ret
 
 merge:          ;here i need to move the SP accordingly
