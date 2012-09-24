@@ -77,7 +77,7 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 mov     sp,a
                 pop     ar0                     ;removing size of right list
                 pop     ar5                     ;addr of right list
-                pop     acc                     ;scratch loc
+                ;pop     acc                     ;scratch loc
 ;here we must place: left addr, right addr, total size then call merge
                 push    ar2
                 push    ar5                     ;address of right list
@@ -90,6 +90,8 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 dec     sp
                 dec     sp
                 dec     sp
+                pop     acc
+                mov     r1,a
                 ret
 
 merge:          ;here i need to move the SP accordingly
