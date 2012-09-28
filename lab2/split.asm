@@ -1,6 +1,3 @@
-;split(list, sizeof(list))
-;
-;size   :r7     
                 offset  equ 10h
                 mov     offset,#2
                 push    ar1
@@ -31,7 +28,7 @@ else:           mov     r6,ar7              ;else, copy the right side of the li
                 mov     r2,ar0
                 mov     a,r7
                 add     a,r0
-                mov     r4,a                ;address at end of the array
+                mov     r7,a
                 mov     a,r0
                 add     a,r6
                 mov     r0,a
@@ -42,7 +39,7 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 inc     r1
                 inc     r0
                 mov     a,r0
-                cjne    a,ar4,r_toscratch
+                cjne    a,ar7,r_toscratch
                 push    ar1                 ;scratch index
                 push    ar2                 ;list index
                 push    ar5                 ;size
@@ -54,11 +51,14 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 lcall   split
                 ;here after it has split the left side, it needs to do the same to the right side.
                 push    ar1                     ;scratch
+                ;dec     ar1
+                mov     a,r7
+                add     a,r5
+                mov     r6,a
                 mov     a,r1
-                clr     c
-                subb    a,r5
+                subb    a,r6
                 push    acc                     ;address of right list
-                push    ar5                     ;size of right list?
+                push    ar6                     ;size of right list
                 mov     offset,#2               ;resetting the offset
                 mov     a,sp
                 add     a,offset

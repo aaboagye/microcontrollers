@@ -1,65 +1,23 @@
-array   equ     20H             ; list starts at 20H in RAMory
-scratch equ     30H             ; scratch space starts at 30H
-stack   equ     47H             ; stack start at 48H
-
-        mov     sp,#stack       ; initialize stack
-
-test1:  mov     r0, #array      ; set all memory to something unique
-        mov     r7, #60H
-clr1:   mov     @r0,# 0eeH
-        inc     r0
-        djnz    r7, clr1
-        mov     r0, #array      ; load the first list of 6 items to sort
-        mov     @r0, #2
-        inc     r0
-        mov     @r0, #240
-        inc     r0
-        mov     @r0, #4 
-        inc     r0
-        mov     @r0, #55 
-        inc     r0
-        mov     @r0, #1 
-        inc     r0
-        mov     @r0, #8 
-        mov     r0, #array
-        mov     r1,#scratch
-        mov     r7,#6
-        call    mergesort
-
-test2:  mov     r0, #array      ; set all memory to something unique again
-        mov     r7, #60H
-clr2:   mov     @r0,# 0eeH
-        inc     r0
-        djnz    r7, clr2
-        mov     r0, #array      ; load the second list of 9 items to sort
-        mov     @r0, #3
-        inc     r0
-        mov     @r0, #6 
-        inc     r0
-        mov     @r0, #5 
-        inc     r0
-        mov     @r0, #4 
-        inc     r0
-        mov     @r0, #5 
-        inc     r0
-        mov     @r0, #2 
-        inc     r0
-        mov     @r0, #0 
-        inc     r0
-        mov     @r0, #240
-        inc     r0
-        mov     @r0, #1 
-        mov     r1,#array
-        mov     r1,#scratch
-        mov     r7,#9
-        call    mergesort
-
-        sjmp    $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+;       Name:   Aseda Gyeke Aboagye
+;                Doug Hewitt
+;                Joe Orr
+;
+;        Lab 2:  Mergesort
+;
+;        Description:
+;                This implementation can recursively split the given list into
+;                the very bottom level. It can then merge up to a max of 1 level.
+;
+;                Although, the merge function works well alone.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 mergesort:
 ;split(list, sizeof(list), scratch)
 ;
-;size   :r7     
+
                 offset  equ 10h
                 mov     offset,#2
                 push    ar1
@@ -115,9 +73,8 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 inc     offset
                 inc     offset
                 lcall   split
-                ;here after it has split the left side, it needs to do the same to the right side.
+;here after it has split the left side, it needs to do the same to the right side.
                 push    ar1                     ;scratch
-                ;dec     ar1
                 mov     a,r7
                 add     a,r5
                 mov     r6,a
@@ -126,35 +83,21 @@ r_toscratch:    mov     a,@r0               ;copy the right side of the list int
                 push    acc                     ;address of right list
                 push    ar3                     ;size of right list
                 mov     offset,#2               ;resetting the offset
-                ;mov     a,sp
-                ;add     a,offset
-                ;mov     sp,a
-                ;inc     offset
-                ;inc     offset
                 lcall   split
-                ;mov     offset,#2
-                ;mov     a,sp
-                ;clr     c
-                ;subb    a,offset
-                ;mov     sp,a
                 pop     ar0                     ;removing size of right list
                 pop     ar5                     ;addr of right list
-                ;pop     acc                     ;scratch loc
 ;here we must place: left addr, right addr, total size then call merge
                 push    ar2
                 push    ar4                     ;address of right list
                 mov     a,r7
                 add     a,r3
                 push    acc
-               ; inc     offset
-               ; inc     offset
                 lcall   merge
                 dec     sp
                 dec     sp
                 pop     ar2
                 dec     sp
                 ret
-
 merge:          ;here i need to move the SP accordingly
                 mov     a,sp
                 clr     c

@@ -1,4 +1,4 @@
-                left    equ 30h         ;left list must be >= right
+                left    equ 30h         ;left list must be <= right
                 right   equ 40h
                 size    equ 6
                 mov     r0,#left
