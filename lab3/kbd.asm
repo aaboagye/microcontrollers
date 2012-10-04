@@ -26,6 +26,18 @@ kbdcode segment code
         rseg    kbdcode         ; your code
 
 kbinit:
+        extrn   code(keytab, keytab2), number(minkey, maxkey)
+        state       EQU     ???                     ; what do we put here?
+        char        EQU     ???
+        parity      EQU     ???
+        cparity     EQU     ???                     ; calculated parity
+        aparity     EQU     PSW.0                   ; psw even parity bit for A
+        start_bit   EQU     ???
+        stop_bit    EQU     ???
+        kbpin       EQU     ???
+        char_error  EQU     FFH                     ; error code? i'm really just making stuff up at this point
+        mov         state,#0
+
         mov     queuesize, #QUEUELEN  ; initialize the queue
         mov     head, #kbdq
         mov     tail, #kbdq
@@ -34,7 +46,57 @@ kbinit:
         ret
 
 kbprocess:
-        ret
+        mov     A,state
+        rl      A               ; x2 to account for ajmp in table
+        mov     DPTR,#table
+        jmp     @A+DPTR
+  table:  ajmp  rx_start_bit    ; state 0
+          ajmp  rx_data         ; state 1
+          ajmp  rx_parity       ; state 2
+          ajmp  rx_stop_bit     ; state 3
+  rx_start_bit:
+        mov     C,kbpin
+        mov     start_bit,C
+        mov     char,#40H   ; same as 10000000 => rr (MSB set for flagging rx_data as done)
+        inc     state
+        jmp     done
+  rx_data:
+        mov     C,kbpin
+        mov     A,char
+        mov     ACC.7,C         ; add bit to MSB, shift right
+        clr     C
+        rrc     A
+        mov     char,A
+        jnc     done            ; if carry is set, we're done with data, otherwise repeat this state
+        inc     state
+        jmp     done
+  rx_parity:
+        mov     C,kbpin
+        mov     parity,C
+        mov     A,char
+        mov     C,aparity
+        cpl     C
+        mov     cparity,C       ; calculated odd parity
+        inc     state
+        jmp     done
+  rx_stop_bit:
+        mov     C,kbpin
+        mov     stop_bit,C
+  valid_chk:                    ; for a valid char: start_bit = 0 && cparity = parity && stop_bit = 1
+        mov     C,parity
+        anl     C,cparity       ; check if cparity = parity
+        jnc     rx_error
+        mov     C,stop_bit
+        anl     C,/start_bit    ; check if start_bit = 0 && stop_bit = 1
+        jnc     rx_error
+  reset_state:
+        mov     state,#0
+        jmp     done
+  rx_error:
+        mov     char,#char_error
+        sjmp    reset_state
+done:
+        ret  ; from kbprocess
 
 kbcheck:
         push    acc
