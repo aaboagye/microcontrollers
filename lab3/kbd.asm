@@ -27,16 +27,18 @@ kbdcode segment code
 
 kbinit:
         extrn   code(keytab, keytab2), number(minkey, maxkey)
-        state       EQU     ???                     ; what do we put here?
-        char        EQU     ???
-        parity      EQU     ???
-        cparity     EQU     ???                     ; calculated parity
+        using       1
+        state       EQU     R0                      ; what do we put here?
+        char        EQU     R1
+        parity      EQU     AR2.0
+        cparity     EQU     AR2.1                   ; calculated parity
         aparity     EQU     PSW.0                   ; psw even parity bit for A
-        start_bit   EQU     ???
-        stop_bit    EQU     ???
-        kbpin       EQU     ???
+        start_bit   EQU     AR2.2
+        stop_bit    EQU     AR2.3
+        kbpin       EQU     P2.2
         char_error  EQU     FFH                     ; error code? i'm really just making stuff up at this point
         mov         state,#0
+        using       0
 
         mov     queuesize, #QUEUELEN  ; initialize the queue
         mov     head, #kbdq
@@ -46,6 +48,7 @@ kbinit:
         ret
 
 kbprocess:
+        using   1
         mov     A,state
         rl      A               ; x2 to account for ajmp in table
         mov     DPTR,#table
@@ -96,6 +99,7 @@ kbprocess:
         mov     char,#char_error
         sjmp    reset_state
 done:
+        using   0
         ret  ; from kbprocess
 
 kbcheck:
