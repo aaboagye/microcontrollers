@@ -1,6 +1,7 @@
 $NOMOD51
 
 $include (c8051f120.inc)        ; Include register definition file.
+public  kbinit, kbcheck
 
         using   0
 
@@ -18,6 +19,14 @@ tail:   ds      1               ; address of queue tail (extraction)
 
 kbdbits segment bit             ; bit variables
         rseg    kbdbits
+parity:     dbit    1
+cparity:    dbit    1           ; calculated parity
+start_bit:  dbit    1
+stop_bit:   dbit    1
+char_ready: dbit    1           ; kbchar is valid and ready
+shifted:    dbit    1
+ctrled:     dbit    1
+breaked:    dbit    1
 
         cseg    at 0*8+3        ; interrupt is priority 0
         ljmp    kbprocess       ; these aren't the droids you're looking for
@@ -32,20 +41,12 @@ kbinit:
         scan_code   EQU     R1
         kbchar      EQU     R3                      ; ascii char grabbed from kb
         akbchar     EQU     AR3                     ; workaround, it's the same though
-        parity      EQU     AR2.0
-        cparity     EQU     AR2.1                   ; calculated parity
         aparity     EQU     PSW.0                   ; psw even parity bit for A
-        start_bit   EQU     AR2.2
-        stop_bit    EQU     AR2.3
-        char_ready  EQU     AR2.4                   ; kbchar is valid and ready
-        shifted     EQU     AR2.5
-        ctrled      EQU     AR2.6
-        breaked     EQU     AR2.7
         kbpin       EQU     P2.2
-        sc_error    EQU     FFH                     ; error code? i'm really just making stuff up at this point
-        shift       EQU     80H
-        crtl        EQU     81H
-        break       EQU     F0H
+        sc_error    EQU     0FFH                     ; error code? i'm really just making stuff up at this point
+        shift       EQU     080H
+        ctrl        EQU     081H
+        break       EQU     0F0H
         mov         state,#0
         using       0
 
@@ -85,9 +86,10 @@ kbprocess:
         clr     C
         rrc     A
         mov     scan_code,A
-        jnc     done            ; if carry is set, we're done with data, otherwise repeat this state
+        jnc     hack            ; if carry is set, we're done with data, otherwise repeat this state
         inc     state
         jmp     done
+    hack: jmp done
   rx_parity:
         mov     C,kbpin
         mov     parity,C
