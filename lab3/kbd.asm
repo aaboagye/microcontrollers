@@ -37,13 +37,13 @@ kbdcode segment code
 kbinit:
         extrn   code(keytab, keytab2), number(minkey, maxkey)
         using       1
-        state       EQU     R0                      ; what do we put here?
-        scan_code   EQU     R1
-        kbchar      EQU     R3                      ; ascii char grabbed from kb
-        akbchar     EQU     AR3                     ; workaround, it's the same though
+        state       EQU     AR0                     ; what do we put here?
+        scan_code   EQU     AR1
+        kbchar      EQU     AR3                     ; ascii char grabbed from kb
+        count       EQU     AR2                     ; used in switch statement
         aparity     EQU     PSW.0                   ; psw even parity bit for A
         kbpin       EQU     P2.2
-        sc_error    EQU     0FFH                     ; error code? i'm really just making stuff up at this point
+        sc_error    EQU     0FFH                    ; error code? i'm really just making stuff up at this point
         shift       EQU     080H
         ctrl        EQU     081H
         break       EQU     0F0H
@@ -75,16 +75,14 @@ kbprocess:
   rx_start_bit:
         mov     C,kbpin
         mov     start_bit,C
-        mov     scan_code,#40H   ; same as 10000000 => rr (MSB set for flagging rx_data as done)
+        mov     scan_code,#80H   ; same as 10000000B (MSB set for flagging rx_data as done)
         mov     kbchar,#00H
         inc     state
         jmp     done
   rx_data:
         mov     C,kbpin
         mov     A,scan_code
-        mov     ACC.7,C         ; add bit to MSB, shift right
-        clr     C
-        rrc     A
+        rrc     A               ; add bit to carry, shift right into MSB
         mov     scan_code,A
         jnc     hack            ; if carry is set, we're done with data, otherwise repeat this state
         inc     state
@@ -133,11 +131,16 @@ kbprocess:
         sjmp    reset_state
   special_key:
         mov     DPTR,#cases     ; cases, case, and switch should all work together like a switch statement, but who knows
-        mov     A,#-1
+        maxC    EQU 3           ; # of cases      
+        mov     count,#-1
     case:
-        inc     A
+        inc     count
+        mov     A,count
+        cjne    A,#maxC,continue ; jump to else case if no cases match
+        jmp     case_end
+        continue:
         movc    A,@A+DPTR
-        cjne    A,akbchar,case
+        cjne    A,kbchar,case
         rl      A
         mov     DPTR,#switch
         jmp     @A+DPTR
