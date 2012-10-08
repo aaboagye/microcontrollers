@@ -146,9 +146,9 @@ kbprocess:
         rl      A
         mov     DPTR,#switch
         jmp     @A+DPTR
-    cases:  ds      shift
-            ds      ctrl
-            ds      break
+    cases:  db      shift
+            db      ctrl
+            db      break
     switch: ajmp    case_shift
             ajmp    case_ctrl
             ajmp    case_break

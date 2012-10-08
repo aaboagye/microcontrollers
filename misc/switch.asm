@@ -18,9 +18,9 @@ switch:                     ; cases, case, and switch should all work together l
     rl      A
     mov     DPTR,#case
     jmp     @A+DPTR
-  cases:    ds      20H     ; different values for case variable
-            ds      40H
-            ds      14H
+  cases:    db      20H     ; different values for case variable
+            db      40H
+            db      14H
             ;etc
   case:     ajmp    case1   ; jump table for cases
             ajmp    case2   ; NOTE: must be in same order as cases
