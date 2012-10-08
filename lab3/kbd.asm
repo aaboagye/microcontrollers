@@ -31,12 +31,13 @@ kbinit:
         state       EQU     R0                      ; what do we put here?
         scan_code   EQU     R1
         kbchar      EQU     R3                      ; ascii char grabbed from kb
+        akbchar     EQU     AR3                     ; workaround, it's the same though
         parity      EQU     AR2.0
         cparity     EQU     AR2.1                   ; calculated parity
         aparity     EQU     PSW.0                   ; psw even parity bit for A
         start_bit   EQU     AR2.2
         stop_bit    EQU     AR2.3
-        char_ready  EQU     AR2.4
+        char_ready  EQU     AR2.4                   ; kbchar is valid and ready
         shifted     EQU     AR2.5
         ctrled      EQU     AR2.6
         breaked     EQU     AR2.7
@@ -118,7 +119,9 @@ kbprocess:
         mov     C,shifted
         rlc     A
         movc    A,@A+DPTR
-        jbc     ACC.7,special
+        mov     kbchar,A
+        jb      ACC.7,special_key
+        ;;NOW DO SOMETHING WITH THE breaked FLAG!
   reset_state:
         mov     state,#0
         jmp     done
@@ -126,6 +129,42 @@ kbprocess:
         mov     scan_code,#sc_error
         mov     kbchar,#sc_error
         sjmp    reset_state
+  special_key:
+        mov     DPTR,#cases     ; cases, case, and switch should all work together like a switch statement, but who knows
+        mov     A,#-1
+    case:
+        inc     A
+        movc    A,@A+DPTR
+        cjne    A,akbchar,case
+        rl      A
+        mov     DPTR,#switch
+        jmp     @A+DPTR
+    cases:  ds      shift
+            ds      ctrl
+            ds      break
+    switch: ajmp    case_shift
+            ajmp    case_ctrl
+            ajmp    case_break
+    case_shift:
+        setb    shifted
+        jnb     breaked,nobreaks    ; if break code is flagged, unset shift and break flags
+        clr     shifted
+        clr     breaked
+      nobreaks:
+        jmp     case_end
+    case_ctrl:
+        setb    ctrled
+        jnb     breaked,nobreakc    ; if break code is flagged, unset ctrl and break flags
+        clr     ctrled
+        clr     breaked
+      nobreakc:
+        jmp     case_end
+    case_break:
+        setb    breaked
+        jmp     case_end
+    case_end:                   ; end of case statement
+        mov     kbchar,#00H
+        jmp     reset_state
 done:
         using   0       ; restore general registers
         pop     PSW
