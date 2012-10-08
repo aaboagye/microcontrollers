@@ -43,7 +43,7 @@ kbinit:
         count       EQU     AR2                     ; used in switch statement
         aparity     EQU     PSW.0                   ; psw even parity bit for A
         kbpin       EQU     P2.2
-        sc_error    EQU     0FFH                    ; error code? i'm really just making stuff up at this point
+        sc_error    EQU     000H                    ; error code? i'm really just making stuff up at this point
         shift       EQU     080H
         ctrl        EQU     081H
         break       EQU     0F0H
@@ -121,7 +121,9 @@ kbprocess:
         movc    A,@A+DPTR
         mov     kbchar,A
         jb      ACC.7,special_key
-        ;;NOW DO SOMETHING WITH THE breaked FLAG!
+        jnb     breaked,reset_state
+        mov     kbchar,#sc_error    ; if the breaked flag is set, ignore char
+        clr     breaked
   reset_state:
         mov     state,#0
         jmp     done

@@ -4,15 +4,15 @@
 switch:                     ; cases, case, and switch should all work together like a switch statement, but who knows
     var     EQU AR0         ; case variable: must be direct memory.
     maxC    EQU 3           ; # of cases
-    count   EQU R1          ; counter: must be register
+    count   EQU AR1         ; counter: must be direct memory.
     mov     DPTR,#cases         
     mov     count,#-1
   loop:
     inc     count
-    cjne    count,#maxC,continue ; jump to else case if no cases match
+    mov     A,count
+    cjne    A,#maxC,continue ; jump to else case if no cases match
     jmp     else
     continue:
-    mov     A,count
     movc    A,@A+DPTR
     cjne    A,var,loop
     rl      A
