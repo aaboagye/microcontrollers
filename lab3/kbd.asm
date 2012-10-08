@@ -29,14 +29,22 @@ kbinit:
         extrn   code(keytab, keytab2), number(minkey, maxkey)
         using       1
         state       EQU     R0                      ; what do we put here?
-        char        EQU     R1
+        scan_code   EQU     R1
+        kbchar      EQU     R3                      ; ascii char grabbed from kb
         parity      EQU     AR2.0
         cparity     EQU     AR2.1                   ; calculated parity
         aparity     EQU     PSW.0                   ; psw even parity bit for A
         start_bit   EQU     AR2.2
         stop_bit    EQU     AR2.3
+        char_ready  EQU     AR2.4
+        shifted     EQU     AR2.5
+        ctrled      EQU     AR2.6
+        breaked     EQU     AR2.7
         kbpin       EQU     P2.2
-        char_error  EQU     FFH                     ; error code? i'm really just making stuff up at this point
+        sc_error    EQU     FFH                     ; error code? i'm really just making stuff up at this point
+        shift       EQU     80H
+        crtl        EQU     81H
+        break       EQU     F0H
         mov         state,#0
         using       0
 
@@ -48,6 +56,11 @@ kbinit:
         ret
 
 kbprocess:
+        push    ACC     ; save general registers' state
+        push    B
+        push    DPH
+        push    DPL
+        push    PSW
         using   1
         mov     A,state
         rl      A               ; x2 to account for ajmp in table
@@ -60,23 +73,24 @@ kbprocess:
   rx_start_bit:
         mov     C,kbpin
         mov     start_bit,C
-        mov     char,#40H   ; same as 10000000 => rr (MSB set for flagging rx_data as done)
+        mov     scan_code,#40H   ; same as 10000000 => rr (MSB set for flagging rx_data as done)
+        mov     kbchar,#00H
         inc     state
         jmp     done
   rx_data:
         mov     C,kbpin
-        mov     A,char
+        mov     A,scan_code
         mov     ACC.7,C         ; add bit to MSB, shift right
         clr     C
         rrc     A
-        mov     char,A
+        mov     scan_code,A
         jnc     done            ; if carry is set, we're done with data, otherwise repeat this state
         inc     state
         jmp     done
   rx_parity:
         mov     C,kbpin
         mov     parity,C
-        mov     A,char
+        mov     A,scan_code
         mov     C,aparity
         cpl     C
         mov     cparity,C       ; calculated odd parity
@@ -85,22 +99,41 @@ kbprocess:
   rx_stop_bit:
         mov     C,kbpin
         mov     stop_bit,C
-  valid_chk:                    ; for a valid char: start_bit = 0 && cparity = parity && stop_bit = 1
+  valid_chk:                    ; for a valid scan_code: start_bit = 0 && cparity = parity && stop_bit = 1
         mov     C,parity
         anl     C,cparity       ; check if cparity = parity
         jnc     rx_error
         mov     C,stop_bit
         anl     C,/start_bit    ; check if start_bit = 0 && stop_bit = 1
         jnc     rx_error
+  lookup:
+        mov     A,scan_code         ; get scancode
+        clr     C
+        subb    A,#minkey           ; check if scancode is smaller than minkey
+        jc      rx_error
+        mov     DPTR,#keytab        ; assume no control key
+        jnb     ctrled,next         ; if ctrl was pressed, use keytab2 instead
+        mov     DPTR,#keytab2
+    next:
+        mov     C,shifted
+        rlc     A
+        movc    A,@A+DPTR
+        jbc     ACC.7,special
   reset_state:
         mov     state,#0
         jmp     done
   rx_error:
-        mov     char,#char_error
+        mov     scan_code,#sc_error
+        mov     kbchar,#sc_error
         sjmp    reset_state
 done:
-        using   0
-        ret  ; from kbprocess
+        using   0       ; restore general registers
+        pop     PSW
+        pop     DPL
+        pop     DPH
+        pop     B
+        pop     ACC
+        ret ;from kbprocess
 
 kbcheck:
         push    acc
