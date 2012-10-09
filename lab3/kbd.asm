@@ -27,6 +27,10 @@ char_ready: dbit    1           ; kbchar is valid and ready
 shifted:    dbit    1
 ctrled:     dbit    1
 breaked:    dbit    1
+state:      ds      1           ; state variable
+scan_code:  ds      1           ; scan code from kb
+kbchar:     ds      1           ; ascii char from scan code
+count:      ds      1           ; used in switch statement
 
         cseg    at 0*8+3        ; interrupt is priority 0
         ljmp    kbprocess       ; these aren't the droids you're looking for
@@ -36,11 +40,6 @@ kbdcode segment code
 
 kbinit:
         extrn   code(keytab, keytab2), number(minkey, maxkey)
-        using       1
-        state       EQU     AR2                     ; what do we put here?
-        scan_code   EQU     AR3
-        kbchar      EQU     AR4                     ; ascii char grabbed from kb
-        count       EQU     AR5                     ; used in switch statement
         aparity     EQU     PSW.0                   ; psw even parity bit for A
         kbpin       EQU     P2.2
         sc_error    EQU     000H                    ; error code? i'm really just making stuff up at this point
@@ -48,7 +47,6 @@ kbinit:
         clr         shifted
         clr         ctrled
         clr         breaked
-        using       0
 
         mov     queuesize, #QUEUELEN  ; initialize the queue
         mov     head, #kbdq
@@ -63,7 +61,6 @@ kbprocess:
         push    DPH
         push    DPL
         push    PSW
-        using   1
         mov     A,state
         rl      A               ; x2 to account for ajmp in table
         mov     DPTR,#table
@@ -183,23 +180,19 @@ kbprocess:
         mov     kbchar,#sc_error
         jmp     reset_state
 valid_char:
-    ;; FIX GETTING kbchar!!!
-        using   0
-        push    AR1
-        mov     r1,head
-        mov     @r1,kbchar      ; ring[head] = item(kbchar)
+        push    AR0             ; save R0
+        mov     R0,head
+        mov     @R0,kbchar      ; ring[head] = item(kbchar)
         inc     head
         dec     queuesize       ; how much is free in ring buffer
         mov     B,#QUEUELEN
         mov     A,head
         div     AB
         mov     head,B          ; head = head % buffer_size
-        pop     AR1
-        using   1
+        pop     AR0
         jmp     reset_state
 done:
-        using   0       ; restore general registers
-        pop     PSW
+        pop     PSW             ; restore general registers
         pop     DPL
         pop     DPH
         pop     B

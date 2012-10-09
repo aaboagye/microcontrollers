@@ -19,7 +19,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>(?i)\b(dword|qword|tword|db|dw|dd|dq|dt|do|dy|resb|resw|resd|resq|rest|reso|resy|incbin|equ|times)\b</string>
+			<string>(?i)\b(dword|qword|tword|db|dw|dd|dq|dt|do|dy|ds|dbit|resb|resw|resd|resq|rest|reso|resy|incbin|equ|times)\b</string>
 			<key>name</key>
 			<string>support.type.asm</string>
 		</dict>

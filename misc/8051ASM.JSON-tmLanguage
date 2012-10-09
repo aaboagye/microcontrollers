@@ -8,7 +8,7 @@
             "name": "comment.line"
         },
         {
-            "match": "(?i)\\b(dword|qword|tword|db|dw|dd|dq|dt|do|dy|resb|resw|resd|resq|rest|reso|resy|incbin|equ|times)\\b", 
+            "match": "(?i)\\b(dword|qword|tword|db|dw|dd|dq|dt|do|dy|ds|dbit|resb|resw|resd|resq|rest|reso|resy|incbin|equ|times)\\b", 
             "name": "support.type.asm"
         }, 
         {
