@@ -37,10 +37,10 @@ kbdcode segment code
 kbinit:
         extrn   code(keytab, keytab2), number(minkey, maxkey)
         using       1
-        state       EQU     AR0                     ; what do we put here?
-        scan_code   EQU     AR1
-        kbchar      EQU     AR3                     ; ascii char grabbed from kb
-        count       EQU     AR2                     ; used in switch statement
+        state       EQU     AR2                     ; what do we put here?
+        scan_code   EQU     AR3
+        kbchar      EQU     AR4                     ; ascii char grabbed from kb
+        count       EQU     AR5                     ; used in switch statement
         aparity     EQU     PSW.0                   ; psw even parity bit for A
         kbpin       EQU     P2.2
         sc_error    EQU     000H                    ; error code? i'm really just making stuff up at this point
@@ -76,7 +76,7 @@ kbprocess:
         mov     C,kbpin
         mov     start_bit,C
         mov     scan_code,#80H   ; same as 10000000B (MSB set for flagging rx_data as done)
-        mov     kbchar,#00H
+        mov     kbchar,#sc_error
         inc     state
         jmp     done
   rx_data:
@@ -180,10 +180,23 @@ kbprocess:
         setb    breaked
         jmp     case_end
     case_end:                   ; end of case statement
-        mov     kbchar,#00H
+        mov     kbchar,#sc_error
         jmp     reset_state
 valid_char:
-;; todo!
+    ;; FIX GETTING kbchar!!!
+        using   0
+        push    AR1
+        mov     r1,head
+        mov     @r1,kbchar      ; ring[head] = item(kbchar)
+        inc     head
+        dec     queuesize       ; how much is free in ring buffer
+        mov     B,#QUEUELEN
+        mov     A,head
+        div     AB
+        mov     head,B          ; head = head % buffer_size
+        pop     AR1
+        using   1
+        jmp     reset_state
 done:
         using   0       ; restore general registers
         pop     PSW
@@ -196,11 +209,11 @@ done:
 kbcheck:
         push    acc
 ;;;;    REMOVE THESE 4 LINES WHEN YOU HAVE IMPLEMENTED RING BUFFER INSERTION
-        mov     a,#0ffH         ; get "no character" value
-        mov     r0, #kbdq
-        xch     a, @r0          ; swap actual character with "no character"
-        mov     R7,a            ; move into return register
-        jmp     wraptail        ; exit
+;        mov     a,#0ffH         ; get "no character" value
+;        mov     r0, #kbdq
+;        xch     a, @r0          ; swap actual character with "no character"
+;        mov     R7,a            ; move into return register
+;        jmp     wraptail        ; exit
 ;;;;
         mov     a, queuesize    ; see if there are chars in queue
         cjne    a, #QUEUELEN, gotchar; not equal means yes
