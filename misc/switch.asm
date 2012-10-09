@@ -15,6 +15,7 @@ switch:                     ; cases, case, and switch should all work together l
     continue:
     movc    A,@A+DPTR
     cjne    A,var,loop
+    mov     A,count
     rl      A
     mov     DPTR,#case
     jmp     @A+DPTR

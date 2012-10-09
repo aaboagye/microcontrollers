@@ -44,10 +44,10 @@ kbinit:
         aparity     EQU     PSW.0                   ; psw even parity bit for A
         kbpin       EQU     P2.2
         sc_error    EQU     000H                    ; error code? i'm really just making stuff up at this point
-        shift       EQU     080H
-        ctrl        EQU     081H
-        break       EQU     0F0H
         mov         state,#0
+        clr         shifted
+        clr         ctrled
+        clr         breaked
         using       0
 
         mov     queuesize, #QUEUELEN  ; initialize the queue
@@ -102,8 +102,12 @@ kbprocess:
         mov     stop_bit,C
   valid_chk:                    ; for a valid scan_code: start_bit = 0 && cparity = parity && stop_bit = 1
         mov     C,parity
-        anl     C,cparity       ; check if cparity = parity
-        jnc     rx_error
+        anl     C,cparity
+        jc      framing         ; check if cparity == 1 && parity == 1
+        mov     C,parity
+        orl     C,cparity       ; check if cparity == 0 && parity == 0     
+        jc      rx_error
+    framing:
         mov     C,stop_bit
         anl     C,/start_bit    ; check if start_bit = 0 && stop_bit = 1
         jnc     rx_error
@@ -117,11 +121,14 @@ kbprocess:
         mov     DPTR,#keytab2
     next:
         mov     C,shifted
+        cpl     C
         rlc     A
         movc    A,@A+DPTR
         mov     kbchar,A
         jb      ACC.7,special_key
-        jnb     breaked,reset_state
+        jb      breaked,clrbreak
+        jmp     valid_char          ; value in kbchar is ready for whatever (ring buffer)
+    clrbreak:
         mov     kbchar,#sc_error    ; if the breaked flag is set, ignore char
         clr     breaked
   reset_state:
@@ -133,7 +140,7 @@ kbprocess:
         sjmp    reset_state
   special_key:
         mov     DPTR,#cases     ; cases, case, and switch should all work together like a switch statement, but who knows
-        maxC    EQU 3           ; # of cases      
+        maxC    EQU 4           ; # of cases      
         mov     count,#-1
     case:
         inc     count
@@ -142,14 +149,17 @@ kbprocess:
         jmp     case_end
         continue:
         movc    A,@A+DPTR
-        cjne    A,kbchar,case
+        cjne    A,scan_code,case
+        mov     A,count
         rl      A
         mov     DPTR,#switch
         jmp     @A+DPTR
-    cases:  db      shift
-            db      ctrl
-            db      break
+    cases:  db      012H        ; left shift
+            db      059H        ; right shift
+            db      014H        ; ctrl
+            db      0F0H        ; break
     switch: ajmp    case_shift
+            ajmp    case_shift
             ajmp    case_ctrl
             ajmp    case_break
     case_shift:
@@ -172,6 +182,8 @@ kbprocess:
     case_end:                   ; end of case statement
         mov     kbchar,#00H
         jmp     reset_state
+valid_char:
+;; todo!
 done:
         using   0       ; restore general registers
         pop     PSW
