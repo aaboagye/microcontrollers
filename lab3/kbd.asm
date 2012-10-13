@@ -101,7 +101,6 @@ table:  ajmp  rx_start_bit                          ; state 0
         mov     scan_code,A
         jnc     hack                                ; if carry is set, we're done with data, otherwise repeat this state
         inc     state
-        jmp     done
 hack:   jmp done
   rx_parity:
         mov     C,kbpin
