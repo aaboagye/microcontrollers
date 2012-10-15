@@ -34,6 +34,10 @@ kbddata segment data                                ; variable storage
 queuesize: ds   1                                   ; count of items in the queue
 head:   ds      1                                   ; address of queue head (insertion)
 tail:   ds      1                                   ; address of queue tail (extraction)
+state:      ds      1                               ; state variable
+scan_code:  ds      1                               ; scan code from kb
+kbchar:     ds      1                               ; ascii char from scan code
+count:      ds      1                               ; used in switch statement
 
 kbdbits segment bit                                 ; bit variables
         rseg    kbdbits
@@ -45,10 +49,6 @@ char_ready: dbit    1                               ; kbchar is valid and ready
 shifted:    dbit    1
 ctrled:     dbit    1
 breaked:    dbit    1
-state:      ds      1                               ; state variable
-scan_code:  ds      1                               ; scan code from kb
-kbchar:     ds      1                               ; ascii char from scan code
-count:      ds      1                               ; used in switch statement
 
         cseg    at 0*8+3                            ; interrupt is priority 0
         ljmp    kbprocess                           ; these aren't the droids you're looking for
@@ -206,7 +206,9 @@ valid_char:
         mov     B,#QUEUELEN
         mov     A,head
         div     AB
-        mov     head,B                              ; head = head % buffer_size
+        mov     a,#kbdq                             ; moving address back
+        add     a,b                                 ; adding offset from modulus
+        mov     head,a                              ; head = head % buffer_size
         pop     AR0
         jmp     reset_state
 done:
