@@ -25,3 +25,5 @@ b. The Reference Control Register, REF0CN enables/disables the internal referenc
 
 MOV RCAP2H,#HIGH 	-128
 MOV RCAP2L,#LOW 	-128
+
+4. Bits 4 and 3 on DACnCN need to be set to 1.
