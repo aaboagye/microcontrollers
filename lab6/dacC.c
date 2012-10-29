@@ -11,6 +11,11 @@
 void dac2init(void){
 /*  initalizes any global variables used. */
     isStereo = 0;
+    volumeL = 0;
+    volumeR = 0;
+    RCAP2 = 0xCA;
+    DACnCN = 0xD4;
+    SFRPAGE = 0x84;
 }
 
 void dacrate(uint16 rate) {
@@ -36,7 +41,26 @@ void dacstereo(uint8 channel) {
 }
 
 void dacvolume(int8 ud) {
-    //
+    if (ud > 0) {
+      //increase volume
+        if (volumeL < MAX_VOLUME && volumeR < MAX_VOLUME) {
+            volumeL++; volumeR++;
+            SFRPAGE = 0;
+            DACnCN << 1;
+            SFRPAGE = 1;
+            DACnCN << 1;
+        }
+    }
+    else {
+      //decrease volume
+        if(volumeL > MIN_VOLUME && volumeR > MIN_VOLUME){
+            volumeL--; volumeR--;
+            SFRPAGE = 0;
+            DACnCN >> 1;
+            SFRPAGE = 1;
+            DACnCN >> 1;
+        }
+    }
 }
 
 void dacbalance(int8 lr) {
