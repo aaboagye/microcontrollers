@@ -5,6 +5,7 @@
 
 #include <c8051f120.h>          // get SFR declarations
 #include "types.h"
+#include "dacC.h"
 
 
 void dac2init(void){
@@ -30,7 +31,8 @@ void dacrate(uint16 rate) {
 }
 
 void dacstereo(uint8 channel) {
-
+    isStereo = channel ? 1 : 0;
+    return;
 }
 
 void dacvolume(int8 ud) {
