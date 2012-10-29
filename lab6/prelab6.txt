@@ -41,6 +41,7 @@ Prelab #6 - DAC pt. 2
 
 
     A similar thing can be done for the balance, where we would decrement 1 channel or the other. Where channel is either DAC0CN or DAC1CN.
+    Note that we should never increment DACnCN past 0bXXXXX111 or decrement DACnCN to 0bXXXXX000, otherwise we would be interfering with bits other than the DACnDF bits (DACnCN[3:0]).
 
 4.  void dacout(void) interrupt n:
 
