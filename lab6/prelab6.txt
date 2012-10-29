@@ -28,11 +28,28 @@ Prelab #6 - DAC pt. 2
 	RCAP2H	0xCB #SFR Page 0
 
 3a.	Perhaps to adjust the volume we can just multiply the sound data by a
-	scalar. To adjust the balance we can just multiply one channel and leave the
-	other channel alone.
+	scalar in order to increase the amplitude. To adjust the balance we can
+	just multiply one channel and leave the	other channel alone.
 
 3b. To adjust the volume via the DAC, we just multiply by shifting to the left.
 	A similar thing can be done for the balance, where we would shift 1 channel
 	or the other. Where channel is either DAC0 or DAC1.
 
-4.
+4.	void dacout(void) interrupt n:
+
+	if(!dactive){
+		if bytesleft == 0 then
+			write to DAC0: 80H
+			write to DAC1: 80H
+			return;
+		else
+			if(isStereo) then
+				write to DAC0: data at buffptr
+				write to DAC1: data at buffptr + 1
+			else
+				write to both DACs: data at buffptr
+			decrement bytesleft by number of bytes sent
+			if(bytesleft == 0)
+				clear dacactive
+			return;
+	}
