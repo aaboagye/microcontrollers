@@ -13,9 +13,6 @@ void dac2init(void){
     isStereo = 0;
     volumeL = 0;
     volumeR = 0;
-    RCAP2 = 0xCA;
-    DACnCN = 0xD4;
-    SFRPAGE = 0x84;
 }
 
 void dacrate(uint16 rate) {
@@ -46,9 +43,9 @@ void dacvolume(int8 ud) {
         if (volumeL < MAX_VOLUME && volumeR < MAX_VOLUME) {
             volumeL++; volumeR++;
             SFRPAGE = 0;
-            DACnCN << 1;
+            DACnCN--;
             SFRPAGE = 1;
-            DACnCN << 1;
+            DACnCN--;
         }
     }
     else {
@@ -56,17 +53,35 @@ void dacvolume(int8 ud) {
         if(volumeL > MIN_VOLUME && volumeR > MIN_VOLUME){
             volumeL--; volumeR--;
             SFRPAGE = 0;
-            DACnCN >> 1;
+            DACnCN++;
             SFRPAGE = 1;
-            DACnCN >> 1;
+            DACnCN++;
         }
     }
 }
 
 void dacbalance(int8 lr) {
-    //
+    if (lr > 0) { // left++, right--
+        if (volumeL < MAX_VOLUME && volumeR > MIN_VOLUME) {
+            volumeL++; volumeR--;
+            SFRPAGE = 0;
+            DACnCN--;
+            SFRPAGE = 1;
+            DACnCN++;
+        }
+    }
+    else { // left--, right++
+        if(volumeL > MIN_VOLUME && volumeR < MAX_VOLUME){
+            volumeL--; volumeR++;
+            SFRPAGE = 0;
+            DACnCN++;
+            SFRPAGE = 1;
+            DACnCN--;
+        }
+    }
 }
 
 void dacout(void) interrupt 0 {
-    //
+    //puts bytes in buffer to be played
+
 }

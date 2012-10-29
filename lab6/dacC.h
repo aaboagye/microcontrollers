@@ -8,13 +8,15 @@ void dacvolume(int8 ud);
 void dacbalance(int8 lr);
 void dacout(void) interrupt 0; // NOTE: 0 is a placeholder for actual interrupt
 
-sfr16 RCAP2; /* little endian. RCAP2L and RCAP2H */
 bit isStereo;
 int8 volumeL;
 int8 volumeR;
-sfr16 DAC0CN;
-sfr16 DAC1CN;
-sfr16 SFRPAGE;
+
+// SFRs: 16-bit little endian. SFRL and SFRH
+sfr16 RCAP2   = 0xCA;
+sfr16 DACnCN  = 0xD4;
+sfr16 DACn    = 0xD2;
+
 #define MAX_VOLUME 3
 #define MIN_VOLUME -3
 
