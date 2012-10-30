@@ -7,7 +7,10 @@
 #include "types.h"
 #include "dac.h"
 
-void dacout(void) interrupt 5;
+void dacout(void);
+extern bit dacactive;
+extern uint16 bytesleft;
+extern uint16 *bufptr;
 
 void dac2init(void){
 /*  initalizes any global variables used. */
