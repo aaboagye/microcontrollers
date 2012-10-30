@@ -5,8 +5,9 @@
 
 #include <c8051f120.h>          // get SFR declarations
 #include "types.h"
-#include "dacC.h"
+#include "dac.h"
 
+void dacout(void) interrupt 5;
 
 void dac2init(void){
 /*  initalizes any global variables used. */
@@ -81,7 +82,30 @@ void dacbalance(int8 lr) {
     }
 }
 
-void dacout(void) interrupt 0 {
+void dacout(void) interrupt 5 {
     //puts bytes in buffer to be played
-
+    if(!dacactive){
+        if(bytesleft == 0){
+            SFRPAGE = 0;
+            DACn = 0x80;
+            SFRPAGE = 1;
+            DACn = 0x80;
+            dacactive = 0;
+        } else {
+            if(isStereo){
+                //write to DAC0 data at bufptr
+                SFRPAGE = 0;
+                DACn = *bufptr;
+                SFRPAGE = 1;
+                DACn = *(bufptr + (sizeof *bufptr)); //i think...
+            } else {
+                SFRPAGE = 0;
+                DACn = *bufptr;
+                SFRPAGE = 1;
+                DACn = *bufptr;
+            }
+            bytesleft--;
+            return;
+        }
+    }
 }
