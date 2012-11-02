@@ -94,16 +94,15 @@ uint8_t _mpur(uint8_t rs) {
 }
 
 void _lcdw(uint8_t rs, uint8_t data) {
-    _mpuw(rs, data);
     busyWait();
+    _mpuw(rs, data);
 }
 
 void busyWait() {
     uint8_t data;
     do {
         data = _mpur(0); // read data with RS = 0
-        data &= 0x80; // we only care about the MSB (busy flag)
-    } while (data == 0x80); // loop while busy
+    } while (data & 0x80); // we only care about the MSB (busy flag), loop while busy
 }
 
 void LCDInit() {
