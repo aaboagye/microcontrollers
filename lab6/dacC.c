@@ -91,7 +91,7 @@ void dacbalance(int8 lr) {
 
 void dacout(void) interrupt 5 {
     //puts bytes in buffer to be played
-    if(!dacactive){
+    if(dacactive){
         if(bytesleft == 0){
             SFRPAGE = 0;
             DACn = 0x80;
@@ -103,13 +103,17 @@ void dacout(void) interrupt 5 {
                 //write to DAC0 data at bufptr
                 SFRPAGE = 0;
                 DACn = *bufptr;
+				bufptr++;
                 SFRPAGE = 1;
-                DACn = *(bufptr + (sizeof *bufptr)); //i think...
+                DACn = *bufptr;
+				bufptr++;
+				bytesleft--;
             } else {
                 SFRPAGE = 0;
                 DACn = *bufptr;
                 SFRPAGE = 1;
                 DACn = *bufptr;
+				bufptr++;
             }
             bytesleft--;
             return;
