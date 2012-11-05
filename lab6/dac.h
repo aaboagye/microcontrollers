@@ -11,10 +11,6 @@ void dacinit(void);
 uint8 dacbusy(void);
 void dacplay(uint16 count, uint8 xdata *buffer);
 
-bit isStereo;
-int8 volumeL;
-int8 volumeR;
-
 // SFRs: 16-bit little endian. SFRL and SFRH
 sfr16 RCAP2  = 0xCA;
 sfr16 DACnCN = 0xD4; // DAC0: SFRPAGE 0, DAC1: SFRPAGE 1

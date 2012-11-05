@@ -12,6 +12,10 @@ extern bit dacactive;
 extern uint16 bytesleft;
 extern uint16 *bufptr;
 
+bit isStereo;
+int8 volumeL;
+int8 volumeR;
+
 void dac2init(void){
 /*  initalizes any global variables used. */
     isStereo = 0;
