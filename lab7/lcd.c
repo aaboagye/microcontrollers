@@ -68,7 +68,7 @@ void lcdwritex(uint8_t xdata *str) {
 }
 
 void lcdpos(uint8_t row, uint8_t col) {
-    _lcdw(1, (0x80 | (row & 0x40) | col)); //lulz
+    _lcdw(1, (0x80 | ((row & 0x01) * 0x40) | (col & 0x0F))); //lulz
 }
 
 void lcdcursor(uint8_t mode) {
