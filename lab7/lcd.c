@@ -9,7 +9,10 @@
 #define CLEAR_RW()  (lcdrw = 0x00)
 
 #define SET_DATA(d) (*(lcdrs | lcdrw | lcdbase) = (d))
-#define GET_DATA()  (DATA_PORT)
+#define GET_DATA()  (*(lcdrs | lcdrw | lcdbase))
+
+// hackros
+#define lcdwstr()    while (*str != '\0') {_lcdw(0, *str); str++;}
 
 // timings in us
 #define T_AS        0.06
@@ -19,10 +22,10 @@
 #define T_DDR       0.4
 
 // utility functions
-void _mpuw(uint8_t rs, uint8_t data);  // write data to MPU
-uint8_t _mpur(uint8_t rs);             // read data from MPU
-void _lcdw(uint8_t rs, uint8_t data);  // write data to MPU, wait for busy state to complete
-void _busy();
+void _mpuw(uint8_t rs, uint8_t data); // write data to MPU
+uint8_t _mpur(uint8_t rs);            // read data from MPU
+void _lcdw(uint8_t rs, uint8_t data); // write data to MPU, wait for busy state to complete
+void _busy();                         // wait on busy flag
 
 // global vars
 uint8_t xdata *lcdbase;
@@ -53,24 +56,15 @@ void lcdinit() {
 }
 
 void lcdwritec(uint8_t code *str) {
-    while (*str != '\0') {
-        _lcdw(0, *str);
-        str++;
-    }
+    lcdwstr();
 }
 
 void lcdwritex(uint8_t xdata *str) {
-    while (*str != '\0') {
-        _lcdw(0, *str);
-        str++;
-    }
+    lcdwstr();
 }
 
 void lcdpos(uint8_t row, uint8_t col) {
-    row &= 0x40;
-
-    uint8_t cmd = 0x80 | row | col;
-    _lcdw(1, cmd);
+    _lcdw(1, (0x80 | (row & 0x40) | col));  //lulz
 }
 
 void lcdcursor(uint8_t mode) {
@@ -104,16 +98,7 @@ void _mpuw(uint8_t rs, uint8_t data) {
         CLEAR_RS();
     }
     CLEAR_RW();
-    delay_us(T_AS);
-
-    SET_E();
-    delay_us(PW_EH - T_DSW);
-
     SET_DATA(data);
-    delay_us(T_DSW);
-
-    CLEAR_E();
-    delay_us(T_AH);
 }
 
 uint8_t _mpur(uint8_t rs) {
@@ -124,17 +109,8 @@ uint8_t _mpur(uint8_t rs) {
         CLEAR_RS();
     }
     SET_RW();
-    delay_us(T_AS);
-
-    SET_E();
-    delay_us(T_DDR);
 
     uint8_t data = GET_DATA();
-    delay_us(PW_EH - T_DDR);
-
-    CLEAR_E();
-    delay_us(T_AH);
-
     return data;
 }
 
