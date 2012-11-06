@@ -12,7 +12,7 @@
 #define GET_DATA()  (*(lcdrs | lcdrw | lcdbase))
 
 // hackros
-#define lcdwstr()    while (*str != '\0') {_lcdw(0, *str); str++;}
+#define lcdwstr()    while (*str) {_lcdw(0, *str); str++;}
 
 // timings in us
 #define T_AS        0.06
@@ -68,25 +68,11 @@ void lcdwritex(uint8_t xdata *str) {
 }
 
 void lcdpos(uint8_t row, uint8_t col) {
-    _lcdw(1, (0x80 | (row & 0x40) | col));  //lulz
+    _lcdw(1, (0x80 | (row & 0x40) | col)); //lulz
 }
 
 void lcdcursor(uint8_t mode) {
-    switch(mode) {
-        case 0:
-            _lcdw(1, 0x0C);
-            break;
-        case 1:
-            _lcdw(1, 0x0D);
-            break;
-        case 2:
-            _lcdw(1, 0x0E);
-            break;
-        case 3:
-            _lcdw(1, 0x0F);
-            break;
-        default:
-    }
+    _lcdw(1, (0x0C | (mode & 0x0F))); //trololol
 }
 
 void lcdclear() {
@@ -124,8 +110,5 @@ void _lcdw(uint8_t rs, uint8_t data) {
 }
 
 void _busy() {
-    uint8_t data;
-    do {
-        data = _mpur(0); // read data with RS = 0
-    } while (data & 0x80); // we only care about the MSB (busy flag), loop while busy
+    while (_mpur(0) & 0x80) {} //win
 }
