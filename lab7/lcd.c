@@ -33,16 +33,23 @@ uint8_t lcdrw;
 void lcdinit() {
     const uint8_t setup_flags = 0x38; // function set: 8-bit mode, 2 lines, 5x8 font
 
-    // external memory
+    // external memory config
+    EMI0CF |= 0x34;                   //external interface on pins P7-P4
+    EMI0CN = 0xFF;                    //8-bit address reference off-chip memory
+    P4MDOUT = 0xC0;                   //read and write control
+    P6MDOUT = 0xFF;                   //address lines
+    P7MDOUT = 0xFF;                   //data lines
 
     // huh?
     _mpuw(1, setup_flags);
     delay_us(37);
 
-    //anoeu
+    // set display on/off, cursor, and blinking.
+    _lcdw(1, 0x0F);
     lcdclear();
 
     _busy();
+    // and 0-60 in about 37 us
 }
 
 void lcdwritec(uint8_t code *str) {
@@ -101,7 +108,7 @@ void _mpuw(uint8_t rs, uint8_t data) {
 
     SET_E();
     delay_us(PW_EH - T_DSW);
-    
+
     SET_DATA(data);
     delay_us(T_DSW);
 
@@ -121,7 +128,7 @@ uint8_t _mpur(uint8_t rs) {
 
     SET_E();
     delay_us(T_DDR);
-    
+
     uint8_t data = GET_DATA();
     delay_us(PW_EH - T_DDR);
 
