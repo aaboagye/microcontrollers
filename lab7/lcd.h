@@ -5,6 +5,7 @@
 
 // functions
 void lcdinit();
+void lcdwrite(uint8_t *str);
 void lcdwritec(uint8_t code *str);
 void lcdwritex(uint8_t xdata *str);
 void lcdpos(uint8_t row, uint8_t col);

@@ -55,6 +55,10 @@ void lcdinit() {
     // and 0-60 in about 37 us
 }
 
+void lcdwrite(uint8_t *str) {
+    lcdwstr();
+}
+
 void lcdwritec(uint8_t code *str) {
     lcdwstr();
 }
