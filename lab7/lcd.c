@@ -1,18 +1,9 @@
 #include "lcd.h"
 #include "delay.h"
-
-// useful macros
-#define SET_RS()    (lcdrs = 0x02)
-#define SET_RW()    (lcdrw = 0x01)
-
-#define CLEAR_RS()  (lcdrs = 0x00)
-#define CLEAR_RW()  (lcdrw = 0x00)
-
-#define SET_DATA(d) (*(lcdrs | lcdrw | lcdbase) = (d))
-#define GET_DATA()  (*(lcdrs | lcdrw | lcdbase))
+#include <c8051f120.h>          // get SFR declarations
 
 // hackros
-#define lcdwstr()    while (*str) {_lcdw(0, *str); str++;}
+#define lcdwstr()    while (*str) {_lcddata(*str); str++;}
 
 // timings in us
 #define T_AS        0.06
@@ -22,15 +13,22 @@
 #define T_DDR       0.4
 
 // utility functions
-void _mpuw(uint8_t rs, uint8_t d);  // write data to MPU
-uint8_t _mpur(uint8_t rs);          // read data from MPU
-void _lcdw(uint8_t rs, uint8_t d);  // write data to MPU, wait for busy state to complete
+void _mpuwdata(uint8_t d);          // write data to MPU
+void _mpuwcmd(uint8_t cmd);
+uint8_t _mpurdata();                // read data from MPU
+uint8_t _mpurcmd();
+void _lcddata(uint8_t d);           // write data to MPU, wait for busy state to complete
+void _lcdcmd(uint8_t d);
 void _busy();                       // wait on busy flag
 
 // global vars
+const uint8_t lcdrs = 0x02;
+const uint8_t lcdrw = 0x01;
 uint8_t xdata *lcdbase;
-uint8_t lcdrs;
-uint8_t lcdrw;
+uint8_t xdata *lcdwdata;
+uint8_t xdata *lcdwcmd;
+uint8_t xdata *lcdrdata;
+uint8_t xdata *lcdrcmd;
 
 // public functions
 void lcdinit() {
@@ -45,15 +43,19 @@ void lcdinit() {
     P6MDOUT = 0xFF;                   //address lines
     P7MDOUT = 0xFF;                   //data lines
 
-    // stuff
-    lcdbase = 0x00;
+    // external pointer config
+    lcdbase  = 0x00;
+    lcdwdata = lcdbase;
+    lcdwcmd  = lcdbase + lcdrs;
+    lcdrdata = lcdbase + lcdrw;
+    lcdrcmd  = lcdbase + lcdrs + lcdrw;
 
     // huh?
-    _mpuw(1, setup_flags);
+    _mpuwcmd(setup_flags);
     delay_us(37);
 
     // set display on/off, cursor, and blinking.
-    _lcdw(1, 0x0F);
+    _lcdcmd(0x0F);
     lcdclear();
 
     _busy();
@@ -73,46 +75,44 @@ void lcdwritex(uint8_t xdata *str) {
 }
 
 void lcdpos(uint8_t row, uint8_t col) {
-    _lcdw(1, (0x80 | ((row & 0x01) * 0x40) | (col & 0x0F))); //lulz
+    _lcdcmd((0x80 | ((row & 0x01) * 0x40) | (col & 0x0F))); //lulz
 }
 
 void lcdcursor(uint8_t mode) {
-    _lcdw(1, (0x0C | (mode & 0x0F))); //trololol
+    _lcdcmd((0x0C | (mode & 0x0F))); //trololol
 }
 
 void lcdclear() {
-    _lcdw(1, 0x01);
+    _lcdcmd(0x01);
 }
 
 // utility function definitions
-void _mpuw(uint8_t rs, uint8_t d) {
-    if (rs == 1) {
-        SET_RS();
-    }
-    else {
-        CLEAR_RS();
-    }
-    CLEAR_RW();
-    SET_DATA(d);
+void _mpuwdata(uint8_t d) {
+    *lcdwdata = d;
 }
 
-uint8_t _mpur(uint8_t rs) {
-    if (rs == 1) {
-        SET_RS();
-    }
-    else {
-        CLEAR_RS();
-    }
-    SET_RW();
-
-    return GET_DATA();
+void _mpuwcmd(uint8_t cmd) {
+    *lcdwcmd = cmd;
 }
 
-void _lcdw(uint8_t rs, uint8_t d) {
+uint8_t _mpurdata() {
+    return *lcdrdata;
+}
+
+uint8_t _mpurcmd() {
+    return *lcdrcmd;
+}
+
+void _lcddata(uint8_t d) {
     _busy();
-    _mpuw(rs, d);
+    _mpuwdata(d);
+}
+
+void _lcdcmd(uint8_t d) {
+    _busy();
+    _mpuwcmd(d);
 }
 
 void _busy() {
-    while (_mpur(0) & 0x80) {} //win
+    while (_mpurcmd() & 0x80) {} //win
 }
