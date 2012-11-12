@@ -1,4 +1,8 @@
 #include "lcd.h"
 
-lcdinit();
-lcdwrite("lol test");
+int main() {
+    lcdinit();
+    lcdwrite("lol test");
+    
+    return 0;
+}

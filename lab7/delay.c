@@ -3,15 +3,13 @@
 void delay_ms(const double t) {
     const int cycles = (t * (1. / 1000.) * (double)CPUCLK) + 1;
 
-    for (int i = 0; i <= cycles; ++i) {
-        // waiting!
-    }
+    int i;
+    for (i = 0; i <= cycles; ++i) {} // wait
 }
 
 void delay_us(const double t) {
     const int cycles = (t * (1. / 1000000.) * (double)CPUCLK) + 1;
 
-    for (int i = 0; i <= cycles; ++i) {
-        // waiting!
-    }
+    int i;
+    for (i = 0; i <= cycles; ++i) {} // wait
 }

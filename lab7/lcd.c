@@ -22,10 +22,10 @@
 #define T_DDR       0.4
 
 // utility functions
-void _mpuw(uint8_t rs, uint8_t data); // write data to MPU
-uint8_t _mpur(uint8_t rs);            // read data from MPU
-void _lcdw(uint8_t rs, uint8_t data); // write data to MPU, wait for busy state to complete
-void _busy();                         // wait on busy flag
+void _mpuw(uint8_t rs, uint8_t d);  // write data to MPU
+uint8_t _mpur(uint8_t rs);          // read data from MPU
+void _lcdw(uint8_t rs, uint8_t d);  // write data to MPU, wait for busy state to complete
+void _busy();                       // wait on busy flag
 
 // global vars
 uint8_t xdata *lcdbase;
@@ -44,6 +44,9 @@ void lcdinit() {
     P4MDOUT = 0xC0;                   //read and write control
     P6MDOUT = 0xFF;                   //address lines
     P7MDOUT = 0xFF;                   //data lines
+
+    // stuff
+    lcdbase = 0x00;
 
     // huh?
     _mpuw(1, setup_flags);
@@ -82,7 +85,7 @@ void lcdclear() {
 }
 
 // utility function definitions
-void _mpuw(uint8_t rs, uint8_t data) {
+void _mpuw(uint8_t rs, uint8_t d) {
     if (rs == 1) {
         SET_RS();
     }
@@ -90,7 +93,7 @@ void _mpuw(uint8_t rs, uint8_t data) {
         CLEAR_RS();
     }
     CLEAR_RW();
-    SET_DATA(data);
+    SET_DATA(d);
 }
 
 uint8_t _mpur(uint8_t rs) {
@@ -102,13 +105,12 @@ uint8_t _mpur(uint8_t rs) {
     }
     SET_RW();
 
-    uint8_t data = GET_DATA();
-    return data;
+    return GET_DATA();
 }
 
-void _lcdw(uint8_t rs, uint8_t data) {
+void _lcdw(uint8_t rs, uint8_t d) {
     _busy();
-    _mpuw(rs, data);
+    _mpuw(rs, d);
 }
 
 void _busy() {
