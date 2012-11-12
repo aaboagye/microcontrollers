@@ -1,3 +1,0 @@
-"C:\Users\Joe\Documents\GitHub\microcontrollers\lab7\delay.obj",
-"C:\Users\Joe\Documents\GitHub\microcontrollers\lab7\lcd.obj",
-"C:\Users\Joe\Documents\GitHub\microcontrollers\lab7\lcd_test.obj"  TO "C:\Users\Joe\Documents\GitHub\microcontrollers\lab7\delay" RS(256) PL(68) PW(78) 
