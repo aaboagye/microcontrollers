@@ -37,8 +37,10 @@ void lcdinit() {
     const uint8_t setup_flags = 0x38; // function set: 8-bit mode, 2 lines, 5x8 font
 
     // external memory config
+    SFRPAGE = 0;
     EMI0CF |= 0x34;                   //external interface on pins P7-P4
     EMI0CN = 0xFF;                    //8-bit address reference off-chip memory
+    SFRPAGE = 0x0F;
     P4MDOUT = 0xC0;                   //read and write control
     P6MDOUT = 0xFF;                   //address lines
     P7MDOUT = 0xFF;                   //data lines
