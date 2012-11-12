@@ -3,7 +3,7 @@
 #include <c8051f120.h>          // get SFR declarations
 
 // hackros
-#define lcdwstr()    while (*str) {_lcddata(*str); str++;}
+#define lcdwstr()    while (*str) {_lcddata(*str); ++str;}
 
 // timings in us
 #define T_AS        0.06
@@ -24,11 +24,11 @@ void _busy();                       // wait on busy flag
 // global vars
 const uint8_t lcdrs = 0x02;
 const uint8_t lcdrw = 0x01;
-uint8_t xdata *lcdbase;
-uint8_t xdata *lcdwdata;
-uint8_t xdata *lcdwcmd;
-uint8_t xdata *lcdrdata;
-uint8_t xdata *lcdrcmd;
+uint8_t pdata *lcdbase;
+uint8_t pdata *lcdwdata;
+uint8_t pdata *lcdwcmd;
+uint8_t pdata *lcdrdata;
+uint8_t pdata *lcdrcmd;
 
 // public functions
 void lcdinit() {
@@ -37,18 +37,18 @@ void lcdinit() {
     // external memory config
     SFRPAGE = 0;
     EMI0CF |= 0x34;                   //external interface on pins P7-P4
-    EMI0CN = 0xFF;                    //8-bit address reference off-chip memory
+    EMI0CN  = 0xFF;                   //8-bit address reference off-chip memory
     SFRPAGE = 0x0F;
     P4MDOUT = 0xC0;                   //read and write control
     P6MDOUT = 0xFF;                   //address lines
     P7MDOUT = 0xFF;                   //data lines
 
     // external pointer config
-    lcdbase  = 0x00;
-    lcdwdata = lcdbase;
-    lcdwcmd  = lcdbase + lcdrs;
-    lcdrdata = lcdbase + lcdrw;
-    lcdrcmd  = lcdbase + lcdrs + lcdrw;
+    lcdbase  = 0xB4;
+    lcdwdata = lcdbase + lcdrs;
+    lcdwcmd  = lcdbase;
+    lcdrdata = lcdbase + lcdrw + lcdrs;
+    lcdrcmd  = lcdbase + lcdrw;
 
     // huh?
     _mpuwcmd(setup_flags);
@@ -75,7 +75,7 @@ void lcdwritex(uint8_t xdata *str) {
 }
 
 void lcdpos(uint8_t row, uint8_t col) {
-    _lcdcmd((0x80 | ((row & 0x01) * 0x40) | (col & 0x0F))); //lulz
+    _lcdcmd((0x80 | (((row & 0x01) << 2) & 0x40) | (col & 0x0F))); //lulz
 }
 
 void lcdcursor(uint8_t mode) {
