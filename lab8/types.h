@@ -8,4 +8,6 @@ typedef short int16_t;
 typedef unsigned long uint32_t;
 typedef long int32_t;
 
+sfr16 SPI0DAT = 0x9B;
+
 #endif
