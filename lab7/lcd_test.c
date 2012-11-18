@@ -3,7 +3,9 @@
 
 int main() {
     lcdinit();
-    lcdwrite("lol test");
-    
+    lcdwritec("newstring");
+    lcdpos(1,0);
+    lcdwrite("!@#$");
+    while(1);
     return 0;
 }

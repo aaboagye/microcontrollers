@@ -32,11 +32,9 @@ uint8_t pdata *lcdrcmd;
 
 // public functions
 void lcdinit() {
-    const uint8_t setup_flags = 0x38; // function set: 8-bit mode, 2 lines, 5x8 font
-
     // external memory config
     SFRPAGE = 0;
-    EMI0CF |= 0x34;                   //external interface on pins P7-P4
+    EMI0CF = 0x34;                   //external interface on pins P7-P4
     EMI0CN  = 0xFF;                   //8-bit address reference off-chip memory
     SFRPAGE = 0x0F;
     P4MDOUT = 0xC0;                   //read and write control
@@ -51,15 +49,13 @@ void lcdinit() {
     lcdrcmd  = lcdbase + lcdrw;
 
     // huh?
-    _mpuwcmd(setup_flags);
+    _mpuwcmd(0x3C);
     delay_us(37);
+    _mpuwcmd(0x0E);
 
     // set display on/off, cursor, and blinking.
-    _lcdcmd(0x0F);
+    _lcdcmd(0x06);
     lcdclear();
-
-    _busy();
-    // and 0-60 in about 37 us
 }
 
 void lcdwrite(uint8_t *str) {
@@ -75,7 +71,7 @@ void lcdwritex(uint8_t xdata *str) {
 }
 
 void lcdpos(uint8_t row, uint8_t col) {
-    _lcdcmd((0x80 | (((row & 0x01) << 2) & 0x40) | (col & 0x0F))); //lulz
+    _lcdcmd((0x80 | ((row & 0x01) << 6) | (col & 0x0F))); //lulz
 }
 
 void lcdcursor(uint8_t mode) {
@@ -114,5 +110,5 @@ void _lcdcmd(uint8_t d) {
 }
 
 void _busy() {
-    while (_mpurcmd() & 0x80) {} //win
+    while (_mpurcmd() & 0x80); //win
 }
