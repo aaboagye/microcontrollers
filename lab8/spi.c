@@ -2,11 +2,24 @@
 #include "spi.h"
 #include "types.h"
 
-#define SCK P0.0            //SPI SCK signal
-#define DO  P0.1            //SPI MISO signal
-#define DI  P0.2            //SPI MOSI signal
-#define CD	P2.1
-#define CS	P2.0
+// pin manip: manip them pins
+#define SCK_PORT    P0            //SPI SCK signal
+#define SCK_POS     0
+#define DO_PORT     P0            //SPI MISO signal
+#define DO_POS      1
+#define DI_PORT     P0            //SPI MOSI signal
+#define DI_POS      2
+#define CD_PORT     P2
+#define CD_POS      1
+#define CS_PORT     P2
+#define CS_POS      0
+
+// use these like SETB(SCK); etc.
+#define SETB(bit)   (bit##_PORT |= (1 << bit##_POS))    // set dat b
+#define CLRB(bit)   (bit##_PORT &= ~(1 << bit##_POS))   // clr dat b
+#define TOGB(bit)   (bit##_PORT ^= (1 << bit##_POS))    // tog dat b
+#define CHKB(bit)   (bit##_PORT & (1 << bit##_POS))     // chk dat b
+                                                        // where b == bit.
 
 //initializes the SPI module.  It does not need to set the SPI clock speed.
 void spiinit(void){
@@ -15,13 +28,14 @@ void spiinit(void){
     NSSMD1 = 0; NSSMD0 = 0; //Setting 3-wire mode.
     SPIEN = 1;              //Enable the SPI module.
     XBR0 |= 0x02;           //Routing pins to SPI module via the crossbar.
+    P0MDOUT |= 0x45;
     return;
 }
 
 /*  returns the status of the CD signal from the microSD card adapter.
     It should return true (non-zero) when there is a card in the adapter. */
 uint8_t spicardpresent(){
-    return (uint8_t)CD;		//Assuming is set high when card is in adapter.
+    return (uint8_t) CHKB(CD);        //Assuming is set high when card is in adapter.
 }
 
 /*  The remaining procedures are called from the SD card module (note, these procedures all have
@@ -29,26 +43,26 @@ uint8_t spicardpresent(){
 
 //sets the SPI clock speed.  If spd is 0, the clock is set to approximately 400KHz; otherwise the clock is set to maximum speed.
 void spi_set_divisor(uint8_t spd){
-	SFRPAGE = 0;
-	SPI0CKR = spd ? 0 : 0xE0;
+    SFRPAGE = 0;
+    SPI0CKR = spd ? 0 : 0x0F;
     return;
 }
 
 //asserts the CS chip select signal line (sets it low).
 void spi_cs_assert(){
-	CS = 0;
+    CLRB(CS);
     return;
 }
 
 //de-asserts the CS chip select signal line (sets it high).
 void spi_cs_deassert(){
-	CS = 1;
+    SETB(CS);
     return;
 }
 
 //sends one byte over the SPI bus.
 void spi_send_byte(uint8_t input){
-	SPI0DAT = input;
+    SPI0DAT = input;
     return;
 }
 
@@ -59,6 +73,9 @@ uint8_t spi_rcv_byte(){
 
 //sends multiple bytes (normally a SD card sector) over the SPI bus.  The code for this procedure was given earlier.
 void spi_rcv_buffer(uint16_t len, uint8_t xdata *buffer){
+    int i;
+    for(i = 0; i < len; i++)
+        SPI0DAT = buffer[i];
     return;
 }
 
