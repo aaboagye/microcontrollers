@@ -5,6 +5,8 @@
 #include "sd.h"
 #include "dac.h"
 
+#pragma code                        // Include ASM in .LST file
+
 int main(void){
     SD_data xdata dat;
     uint8_t xdata buffer[512];
@@ -34,12 +36,12 @@ int main(void){
             lcdpos(1,0);
             lcdwrite("failure.");
         } else {
-            microSDread(0x112358, buffer);
+            spi_set_divisor(1);     // Set to max speed after initialisation
+            microSDread(0x112358, (uint8_t *) dat);
             lcdclear();
             lcdpos(0,0);
-            lcdwrite(buffer);
+            lcdwrite(dat.string);
             while(spicardpresent()){
-                dat = (SD_data) buffer;
                 PCON |= 1;
                 if(!dacbusy()){
                     dacplay(dat.len, dat.wavedata); //output to DAC
