@@ -39,6 +39,7 @@ int main(void){
             lcdpos(0,0);
             lcdwrite(buffer);
             while(spicardpresent()){
+                dat = (SD_data) buffer;
                 PCON |= 1;
                 if(!dacbusy()){
                     dacplay(dat.len, dat.wavedata); //output to DAC
