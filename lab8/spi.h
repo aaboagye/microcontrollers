@@ -3,6 +3,12 @@
 
 #include "types.h"
 
+typedef struct {
+      char string[16];
+      unsigned short len;
+      uint8_t wavedata[512];
+} SD_data;
+
 //initializes the SPI module.  It does not need to set the SPI clock speed.
 void spiinit();
 

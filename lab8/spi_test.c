@@ -3,32 +3,31 @@
 #include "spi.h"
 #include "lcd.h"
 #include "sd.h"
-
-typedef struct {
-      char string[16];
-      unsigned short len;
-      uint8_t wavedata[512];
-} SD_data;
+#include "dac.h"
 
 int main(void){
     SD_data xdata dat;
-    uint8_t lol;
     uint8_t xdata buffer[512];
 
-    SFRPAGE = 0x0F;
     //init procedures
-    WDTCN = 0xDE;             // Disable watchdog timer
+    SFRPAGE = 0x0F;
+    WDTCN = 0xDE;                   // Disable watchdog timer
     WDTCN = 0xAD;
     OSCICN = 0xC2;
-    XBR2 |= 0x40;              // Enable crossbar and weak pull-up
-
+    XBR2 |= 0x40;                   // Enable crossbar and weak pull-up
+    EA = 1;                         // Enable all interrupts
     spi_set_divisor(0);
     spiinit();
     lcdinit();
+    kbinit();
+    dacinit();
+    dac2init();
+    dacrate(11025);
+    dacstereo(0);                   // Set number of channels to mono
 
     while(1){
-        while(!spicardpresent());
-        if(!microSDinit()){
+        while(!spicardpresent());   // Wait until card is detected
+        if(!microSDinit()){         // If initialization fails, print error.
             lcdclear();
             lcdpos(0,0);
             lcdwrite("ERROR: microSD");
@@ -40,20 +39,12 @@ int main(void){
             lcdpos(0,0);
             lcdwrite(buffer);
             while(spicardpresent()){
-//              dat = (SD_data) buffer;
-
-                //output data to DAC
+                PCON |= 1;
+                if(!dacbusy()){
+                    dacplay(dat.len, dat.wavedata); //output to DAC
+                }
             }
         }
     }
-    lol = microSDinit();
-
-    do {
-        lol = microSDread(0x112358, dat.wavedata);
-        lcdwrite(dat.string);
-        lcdpos(0, 0);
-    } while(!lol);
-
-    while(1);
     return 0;
 }

@@ -20,7 +20,7 @@
 #define TOGB(bit)   (bit##_PORT ^= (1 << bit##_POS))    // tog dat b
 #define CHKB(bit)   (bit##_PORT & (1 << bit##_POS))     // chk dat b
                                                         // where b == bit.
-
+//Pin declarations
 sbit CS     = P2^0;
 sbit CD     = P2^1;
 sbit DO     = P0^1;
@@ -35,9 +35,9 @@ void spiinit(void){
     SPIEN = 1;              //Enable the SPI module.
     SFRPAGE = 0x0F;
     XBR0 |= 0x03;           //Routing pins to SPI module via the crossbar.
-    XBR1 |= 0x20;
+    XBR1 |= 0x20;           //Enabling timer 2
     P0MDOUT |= 0x07;
-    P2MDOUT |= 0x02;
+    P2MDOUT |= 0x02;        //Setting push-pull mode for needed pins
     SFRPAGE = 0;
     return;
 }
@@ -45,13 +45,13 @@ void spiinit(void){
 /*  returns the status of the CD signal from the microSD card adapter.
     It should return true (non-zero) when there is a card in the adapter. */
 uint8_t spicardpresent(){
-    return (uint8_t)CD;        //Assuming is set high when card is in adapter.
+    return (uint8_t) CHKB(CD);   //Assuming is set high when card is in adapter.
 }
 
-/*  The remaining procedures are called from the SD card module (note, these procedures all have
-    underscores in their names) */
+/*  The remaining procedures are called from the SD card module (note, these
+    procedures all have underscores in their names) */
 
-//sets the SPI clock speed.  If spd is 0, the clock is set to approximately 400KHz; otherwise the clock is set to maximum speed.
+//sets the SPI clock speed. If spd is 0, the clock is set to approximately 400KHz; otherwise the clock is set to maximum speed.
 void spi_set_divisor(uint8_t spd){
     SFRPAGE = 0;
     SPI0CKR = spd ? 0 : 0x0F;
@@ -60,14 +60,12 @@ void spi_set_divisor(uint8_t spd){
 
 //asserts the CS chip select signal line (sets it low).
 void spi_cs_assert(){
-    //CLRB(CS);
     CS = 0;
     return;
 }
 
 //de-asserts the CS chip select signal line (sets it high).
 void spi_cs_deassert(){
-   // SETB(CS);
     CS = 1;
     return;
 }
@@ -88,15 +86,12 @@ uint8_t spi_rcv_byte(){
     return SPI0DAT;
 }
 
-//sends multiple bytes (normally a SD card sector) over the SPI bus.  The code for this procedure was given earlier.
+//sends multiple bytes (normally a SD card sector) over the SPI bus.
 void spi_rcv_buffer(uint16_t len, uint8_t xdata *buffer){
     int i;
-
     spi_cs_assert();
     for(i = 0; i < len; i++)
         buffer[i] = spi_rcv_byte();
     spi_cs_deassert();
-
     return;
 }
-
