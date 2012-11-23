@@ -1,14 +1,12 @@
 
-<!-- saved from url=(0125)https://pacific.rsmart.com/access/content/group/4ea8b18c-4b5b-4c36-92c5-024eea981c29/Fall%202012%20Lecture%20slides/SMBus.asm -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>window["_GOOG_TRANS_EXT_VER"] = "1";</script></head><body class=" hasGoogleVoiceExt"><pre style="word-wrap: break-word; white-space: pre-wrap;">
 
 ;; void smbus_setup (void)
 ;; void smbus_send (uint16 eepromaddr, uint8 len, uint8 xdata * buffer);
 ;; void smbus_receive (uint16 eepromaddr, uint8 len, uint8 xdata * buffer);
 
-;first argument   R7      R6 &amp; R7, MSB in R6
-;second argument  R5      R4 &amp; R5, MSB in R4
-;third argument   R3      R2 &amp; R3, MSB in R2
+;first argument   R7      R6 & R7, MSB in R6
+;second argument  R5      R4 & R5, MSB in R4
+;third argument   R3      R2 & R3, MSB in R2
 
 ;; after sending slave address (on write), send two-byte memory address (always)
 ;; after sending memory address, 
@@ -76,8 +74,8 @@ public SMBus_Setup, _SMBUS_SEND, _SMBUS_RECEIVE
 
    ; SMBus States
    SMB_BUS_ERROR   EQU   00h         ; (all modes) BUS ERROR
-   SMB_START       EQU   08h         ; (MT &amp; MR) START transmitted
-   SMB_RP_START    EQU   10h         ; (MT &amp; MR) repeated START
+   SMB_START       EQU   08h         ; (MT & MR) START transmitted
+   SMB_RP_START    EQU   10h         ; (MT & MR) repeated START
    SMB_MTADDACK    EQU   18h         ; (MT) Slave address + W transmitted;
                                      ;  ACK received
    SMB_MTADDNACK   EQU   20h         ; (MT) Slave address + W transmitted;
@@ -154,11 +152,11 @@ SMBus_Setup:
 
 
 ;;  memaddr: address in SMBus memory device
-;;        R6 &amp; R7
+;;        R6 & R7
 ;;  len: number of bytes in buffer
 ;;        R5
 ;;  buffer: local buffer to read/write
-;;        R2 &amp; R3
+;;        R2 & R3
 
 _SMBUS_SEND:
    push   ACC                        ; Preserve accumulator
@@ -445,4 +443,3 @@ SMB_ISR_END:
 
 END
 
-</pre></body></html>

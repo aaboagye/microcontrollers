@@ -1,8 +1,6 @@
-
-<!-- saved from url=(0123)https://pacific.rsmart.com/access/content/group/4ea8b18c-4b5b-4c36-92c5-024eea981c29/Fall%202012%20Lecture%20slides/prefs.c -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>window["_GOOG_TRANS_EXT_VER"] = "1";</script></head><body class=" hasGoogleVoiceExt"><pre style="word-wrap: break-word; white-space: pre-wrap;">#include "c8051F120.h"
-#include &lt;smbus.h&gt;              // SMBus interface routines
-#include &lt;prefs.h&gt;              // preference routines and definitions
+#include "c8051F120.h"
+#include <smbus.h>              // SMBus interface routines
+#include <prefs.h>              // preference routines and definitions
 
 static bit backupPending;
 static uint8 idata count;
@@ -16,15 +14,15 @@ void blockInit(void)
   uint8 i;
   {
     prefData xdata tmp;
-    uint8 xdata *ptr = (uint8 xdata *)&amp;tmp;
+    uint8 xdata *ptr = (uint8 xdata *)&tmp;
     for(i = sizeof(prefData); i--; *ptr++ = 0);
-    smbus_send (0, sizeof(prefData), (uint8 *)&amp;tmp);
+    smbus_send (0, sizeof(prefData), (uint8 *)&tmp);
   }
   {
     backupData xdata tmp;
-    uint8 xdata *ptr = (uint8 xdata *)&amp;tmp;
+    uint8 xdata *ptr = (uint8 xdata *)&tmp;
     for(i = sizeof(backupData); i--; *ptr++ = 0);
-    smbus_send (sizeof(prefData), sizeof(backupData), (uint8 *)&amp;tmp);
+    smbus_send (sizeof(prefData), sizeof(backupData), (uint8 *)&tmp);
   }
 }
 
@@ -71,14 +69,14 @@ uint8 backupWrite(uint16 block, backupData xdata* buffer)
 { 
   if( backupPending ) {         // if timer has expired, do a write
     uint8 status = 0;           // default status == no change
-    buffer-&gt;backupCount++;      // update write count
-    if( buffer-&gt;backupCount == 0) {
-      buffer-&gt;backupCount2++;
-      if(buffer-&gt;backupCount2 &amp; 0x08) {
+    buffer->backupCount++;      // update write count
+    if( buffer->backupCount == 0) {
+      buffer->backupCount2++;
+      if(buffer->backupCount2 & 0x08) {
         status = 1;             // write count has overflowed
         block += 1;
-        buffer-&gt;backupCount = 0;
-        buffer-&gt;backupCount2 = 0;
+        buffer->backupCount = 0;
+        buffer->backupCount2 = 0;
       }
     }
     smbus_send (sizeof(prefData)+block*sizeof(block), sizeof(backupData), 
@@ -105,4 +103,3 @@ void backupTimer(uint8 enable)
   }
   SFRPAGE = 0;
 }
-</pre></body></html>

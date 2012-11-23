@@ -1,6 +1,4 @@
-
-<!-- saved from url=(0129)https://pacific.rsmart.com/access/content/group/4ea8b18c-4b5b-4c36-92c5-024eea981c29/Fall%202012%20Lecture%20slides/smb_example.c -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>window["_GOOG_TRANS_EXT_VER"] = "1";</script></head><body class=" hasGoogleVoiceExt"><pre style="word-wrap: break-word; white-space: pre-wrap;">//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
 //
 // Example code for interfacing a C8051F0xx to three EEPROMs via the SMBus.
 // Code assumes that three 16-bit address space EEPROMs are connected
@@ -33,8 +31,8 @@
 // MT = Master Transmitter
 // MR = Master Receiver
 #define  SMB_BUS_ERROR  0x00        // (all modes) BUS ERROR
-#define  SMB_START      0x08        // (MT &amp; MR) START transmitted
-#define  SMB_RP_START   0x10        // (MT &amp; MR) repeated START
+#define  SMB_START      0x08        // (MT & MR) START transmitted
+#define  SMB_RP_START   0x10        // (MT & MR) repeated START
 #define  SMB_MTADDACK   0x18        // (MT) Slave address + W transmitted;
                                     //  ACK received
 #define  SMB_MTADDNACK  0x20        // (MT) Slave address + W transmitted;
@@ -63,7 +61,7 @@ char BYTE_NUMBER;                   // Used by ISR to check what data has just b
                                     // sent - High address byte, Low byte, or data
                                     // byte
 
-unsigned char HIGH_ADD, LOW_ADD;    // High &amp; Low byte for EEPROM memory address
+unsigned char HIGH_ADD, LOW_ADD;    // High & Low byte for EEPROM memory address
 
 bit SM_BUSY;                        // This bit is set when a send or receive
                                     // is started. It is cleared by the
@@ -95,8 +93,8 @@ void SM_Send (char chip_select, unsigned int byte_address, char out_byte)
    BYTE_NUMBER = 2;                          // 2 address bytes.
    COMMAND = (chip_select | WRITE);          // Chip select + WRITE
 
-   HIGH_ADD = ((byte_address &gt;&gt; 8) &amp; 0x00FF);// Upper 8 address bits
-   LOW_ADD = (byte_address &amp; 0x00FF);        // Lower 8 address bits
+   HIGH_ADD = ((byte_address >> 8) & 0x00FF);// Upper 8 address bits
+   LOW_ADD = (byte_address & 0x00FF);        // Lower 8 address bits
 
    WORD = out_byte;                          // Data to be writen
    
@@ -119,8 +117,8 @@ char SM_Receive (char chip_select, unsigned int byte_address)
    BYTE_NUMBER = 2;                          // 2 address bytes
    COMMAND = (chip_select | READ);           // Chip select + READ
 
-   HIGH_ADD = ((byte_address &gt;&gt; 8) &amp; 0x00FF);// Upper 8 address bits
-   LOW_ADD = (byte_address &amp; 0x00FF);        // Lower 8 address bits
+   HIGH_ADD = ((byte_address >> 8) & 0x00FF);// Upper 8 address bits
+   LOW_ADD = (byte_address & 0x00FF);        // Lower 8 address bits
    
    STO = 0;
    STA = 1;                                  // Start transfer
@@ -145,7 +143,7 @@ void SMBUS_ISR (void) interrupt 7
       // always be a zero (W) because for both read and write,
       // the memory address must be written first.
       case SMB_START:
-         SMB0DAT = (COMMAND &amp; 0xFE);   // Load address of the slave to be accessed.
+         SMB0DAT = (COMMAND & 0xFE);   // Load address of the slave to be accessed.
          STA = 0;                      // Manually clear START bit
          break;
 
@@ -182,7 +180,7 @@ void SMBUS_ISR (void) interrupt 7
                BYTE_NUMBER--;          // Decrement for next time around.
                break;
             case 1:                    // If BYTE_NUMBER=1, LOW_ADD was just sent.
-               if (COMMAND &amp; 0x01){    // If R/W=READ, sent repeated START.
+               if (COMMAND & 0x01){    // If R/W=READ, sent repeated START.
                   STO = 0;
                   STA = 1;
 
@@ -251,4 +249,3 @@ void SMBUS_ISR (void) interrupt 7
 
    SI=0;                               // clear interrupt flag
 }
-</pre></body></html>

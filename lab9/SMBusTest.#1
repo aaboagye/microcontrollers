@@ -41,9 +41,9 @@ void main(void)
   NSSMD1 = NSSMD0 = 0;
 
 // enable your other modules
-//  kbinit(  );
-//  dacinit(  );
-//  dac2init(  );
+  kbinit(  );
+  dacinit(  );
+  dac2init(  );
   smbus_init(  );
   smbus_setup( );
 

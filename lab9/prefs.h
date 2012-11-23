@@ -1,8 +1,6 @@
-
-<!-- saved from url=(0123)https://pacific.rsmart.com/access/content/group/4ea8b18c-4b5b-4c36-92c5-024eea981c29/Fall%202012%20Lecture%20slides/prefs.h -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>window["_GOOG_TRANS_EXT_VER"] = "1";</script></head><body class=" hasGoogleVoiceExt"><pre style="word-wrap: break-word; white-space: pre-wrap;">#ifndef _PREFSH
+#ifndef _PREFSH
 #define _PREFSH
-#include &lt;types.h&gt;
+#include <types.h>
 
 typedef struct {
   uint16 backupBlock;           // block where current backup data is stored
@@ -36,4 +34,3 @@ void backupTimer(uint8 enable);
 
 
 #endif          // _PREFSH
-</pre></body></html>
