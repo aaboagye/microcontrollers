@@ -1,4 +1,4 @@
-#include <c8051f120.h>          // get SFR declarations
+#include <C8051F120.h>          // get SFR declarations
 #include "spi.h"
 #include "types.h"
 
@@ -21,12 +21,10 @@
 #define CHKB(bit)   (bit##_PORT & (1 << bit##_POS))     // chk dat b
                                                         // where b == bit.
 //Pin declarations
-sbit CS     = P2^0;
-sbit CD     = P2^1;
-sbit DO     = P0^1;
-sbit DI     = P0^2;
-sbit SCK    = P0^0;
-
+#define CS P2_0
+#define CD P2_1
+#define DO P0_1
+#define SCK P0_0
 //initializes the SPI module.  It does not need to set the SPI clock speed.
 void spiinit(void){
     SFRPAGE = 0;
@@ -34,9 +32,11 @@ void spiinit(void){
     NSSMD1 = 0; NSSMD0 = 0; //Setting 3-wire mode.
     SPIEN = 1;              //Enable the SPI module.
     SFRPAGE = 0x0F;
-    XBR0 |= 0x03;           //Routing pins to SPI module via the crossbar.
-    XBR1 |= 0x20;           //Enabling timer 2
-    P0MDOUT |= 0x07;
+    //### XBR0 |= 0x03;           //Routing pins to SPI module via the crossbar.
+    //### XBR1 |= 0x20;           //Enabling timer 2
+    XBR0 |= 0x02;           // ###
+    // ### P0MDOUT |= 0x07;
+    P0MDOUT |= 0x05;        // ### set push-pull for P0.0 and P0.2
     P2MDOUT |= 0x02;        //Setting push-pull mode for needed pins
     SFRPAGE = 0;
     return;
@@ -45,7 +45,8 @@ void spiinit(void){
 /*  returns the status of the CD signal from the microSD card adapter.
     It should return true (non-zero) when there is a card in the adapter. */
 uint8_t spicardpresent(){
-    return (uint8_t) CHKB(CD);   //Assuming is set high when card is in adapter.
+    //### return (uint8_t) CHKB(CD);   //Assuming is set high when card is in adapter.
+    return CD == 1;   //### much more efficient
 }
 
 /*  The remaining procedures are called from the SD card module (note, these
@@ -88,10 +89,12 @@ uint8_t spi_rcv_byte(){
 
 //sends multiple bytes (normally a SD card sector) over the SPI bus.
 void spi_rcv_buffer(uint16_t len, uint8_t xdata *buffer){
-    int i;
+    //### int i;
     spi_cs_assert();
-    for(i = 0; i < len; i++)
-        buffer[i] = spi_rcv_byte();
+    //### for(i = 0; i < len; i++)
+        //### buffer[i] = spi_rcv_byte();  
+    while(len--)   // ###
+        *buffer++ = spi_rcv_byte();  //### array not as efficient as pointer
     spi_cs_deassert();
     return;
 }

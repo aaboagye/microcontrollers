@@ -2,224 +2,226 @@
 ; codes with >= 080h are special function codes
 ; other codes are ASCII values
 ; the values in the first column are shifted
-public	keytab, keytab2, minkey, maxkey
+;public	keytab, keytab2, minkey, maxkey
+.globl keytab
+.globl keytab2
+.globl minkey
+.globl maxkey
 
-keyscan	segment	code
-	rseg	keyscan
-minkey	equ	13
-maxkey	equ	118
+.area keyscan (CODE,REL)
+minkey	=	13
+maxkey	=	118
 keytab:
-      db      009H, 009H ; 13
-      db      07eH, 060H ; 14
-      db      0ffH, 0ffH ; 15
-      db      0ffH, 0ffH ; 16
-      db      0ffH, 0ffH ; 17
-      db      080H, 080H ; 18
-      db      0ffH, 0ffH ; 19
-      db      081H, 081H ; 20
-      db      051H, 071H ; 21
-      db      021H, 031H ; 22
-      db      0ffH, 0ffH ; 23
-      db      0ffH, 0ffH ; 24
-      db      0ffH, 0ffH ; 25
-      db      05aH, 07aH ; 26
-      db      053H, 073H ; 27
-      db      041H, 061H ; 28
-      db      057H, 077H ; 29
-      db      040H, 032H ; 30
-      db      0ffH, 0ffH ; 31
-      db      0ffH, 0ffH ; 32
-      db      043H, 063H ; 33
-      db      058H, 078H ; 34
-      db      044H, 064H ; 35
-      db      045H, 065H ; 36
-      db      024H, 034H ; 37
-      db      023H, 033H ; 38
-      db      0ffH, 0ffH ; 39
-      db      0ffH, 0ffH ; 40
-      db      020H, 020H ; 41
-      db      056H, 076H ; 42
-      db      046H, 066H ; 43
-      db      054H, 074H ; 44
-      db      052H, 072H ; 45
-      db      025H, 035H ; 46
-      db      0ffH, 0ffH ; 47
-      db      0ffH, 0ffH ; 48
-      db      04eH, 06eH ; 49
-      db      042H, 062H ; 50
-      db      048H, 068H ; 51
-      db      047H, 067H ; 52
-      db      059H, 079H ; 53
-      db      05eH, 036H ; 54
-      db      0ffH, 0ffH ; 55
-      db      0ffH, 0ffH ; 56
-      db      0ffH, 0ffH ; 57
-      db      04dH, 06dH ; 58
-      db      04aH, 06aH ; 59
-      db      055H, 075H ; 60
-      db      026H, 037H ; 61
-      db      02aH, 038H ; 62
-      db      0ffH, 0ffH ; 63
-      db      0ffH, 0ffH ; 64
-      db      03cH, 02cH ; 65
-      db      04bH, 06bH ; 66
-      db      049H, 069H ; 67
-      db      04fH, 06fH ; 68
-      db      029H, 030H ; 69
-      db      028H, 039H ; 70
-      db      0ffH, 0ffH ; 71
-      db      0ffH, 0ffH ; 72
-      db      03eH, 02eH ; 73
-      db      03fH, 02fH ; 74
-      db      04cH, 06cH ; 75
-      db      03aH, 03bH ; 76
-      db      050H, 070H ; 77
-      db      05fH, 02dH ; 78
-      db      0ffH, 0ffH ; 79
-      db      0ffH, 0ffH ; 80
-      db      0ffH, 0ffH ; 81
-      db      022H, 027H ; 82
-      db      0ffH, 0ffH ; 83
-      db      07bH, 05bH ; 84
-      db      02bH, 03dH ; 85
-      db      0ffH, 0ffH ; 86
-      db      0ffH, 0ffH ; 87
-      db      0ffH, 0ffH ; 88
-      db      080H, 080H ; 89
-      db      00dH, 00dH ; 90
-      db      07dH, 05dH ; 91
-      db      0ffH, 0ffH ; 92
-      db      07cH, 05cH ; 93
-      db      0ffH, 0ffH ; 94
-      db      0ffH, 0ffH ; 95
-      db      0ffH, 0ffH ; 96
-      db      0ffH, 0ffH ; 97
-      db      0ffH, 0ffH ; 98
-      db      0ffH, 0ffH ; 99
-      db      0ffH, 0ffH ; 100
-      db      0ffH, 0ffH ; 101
-      db      008H, 008H ; 102
-      db      0ffH, 0ffH ; 103
-      db      0ffH, 0ffH ; 104
-      db      0ffH, 0ffH ; 105
-      db      0ffH, 0ffH ; 106
-      db      0ffH, 0ffH ; 107
-      db      0ffH, 0ffH ; 108
-      db      0ffH, 0ffH ; 109
-      db      0ffH, 0ffH ; 110
-      db      0ffH, 0ffH ; 111
-      db      0ffH, 0ffH ; 112
-      db      0ffH, 0ffH ; 113
-      db      0ffH, 0ffH ; 114
-      db      0ffH, 0ffH ; 115
-      db      0ffH, 0ffH ; 116
-      db      0ffH, 0ffH ; 117
-      db      01bH, 01bH ; 118
+      .db     0x09,0x09 ; 13
+      .db     0x7e,0x60 ; 14
+      .db     0xff,0xff ; 15
+      .db     0xff,0xff ; 16
+      .db     0xff,0xff ; 17
+      .db     0x80,0x80 ; 18
+      .db     0xff,0xff ; 19
+      .db     0x81,0x81 ; 20
+      .db     0x51,0x71 ; 21
+      .db     0x21,0x31 ; 22
+      .db     0xff,0xff ; 23
+      .db     0xff,0xff ; 24
+      .db     0xff,0xff ; 25
+      .db     0x5a,0x7a ; 26
+      .db     0x53,0x73 ; 27
+      .db     0x41,0x61 ; 28
+      .db     0x57,0x77 ; 29
+      .db     0x40,0x32 ; 30
+      .db     0xff,0xff ; 31
+      .db     0xff,0xff ; 32
+      .db     0x43,0x63 ; 33
+      .db     0x58,0x78 ; 34
+      .db     0x44,0x64 ; 35
+      .db     0x45,0x65 ; 36
+      .db     0x24,0x34 ; 37
+      .db     0x23,0x33 ; 38
+      .db     0xff,0xff ; 39
+      .db     0xff,0xff ; 40
+      .db     0x20,0x20 ; 41
+      .db     0x56,0x76 ; 42
+      .db     0x46,0x66 ; 43
+      .db     0x54,0x74 ; 44
+      .db     0x52,0x72 ; 45
+      .db     0x25,0x35 ; 46
+      .db     0xff,0xff ; 47
+      .db     0xff,0xff ; 48
+      .db     0x4e,0x6e ; 49
+      .db     0x42,0x62 ; 50
+      .db     0x48,0x68 ; 51
+      .db     0x47,0x67 ; 52
+      .db     0x59,0x79 ; 53
+      .db     0x5e,0x36 ; 54
+      .db     0xff,0xff ; 55
+      .db     0xff,0xff ; 56
+      .db     0xff,0xff ; 57
+      .db     0x4d,0x6d ; 58
+      .db     0x4a,0x6a ; 59
+      .db     0x55,0x75 ; 60
+      .db     0x26,0x37 ; 61
+      .db     0x2a,0x38 ; 62
+      .db     0xff,0xff ; 63
+      .db     0xff,0xff ; 64
+      .db     0x3c,0x2c ; 65
+      .db     0x4b,0x6b ; 66
+      .db     0x49,0x69 ; 67
+      .db     0x4f,0x6f ; 68
+      .db     0x29,0x30 ; 69
+      .db     0x28,0x39 ; 70
+      .db     0xff,0xff ; 71
+      .db     0xff,0xff ; 72
+      .db     0x3e,0x2e ; 73
+      .db     0x3f,0x2f ; 74
+      .db     0x4c,0x6c ; 75
+      .db     0x3a,0x3b ; 76
+      .db     0x50,0x70 ; 77
+      .db     0x5f,0x2d ; 78
+      .db     0xff,0xff ; 79
+      .db     0xff,0xff ; 80
+      .db     0xff,0xff ; 81
+      .db     0x22,0x27 ; 82
+      .db     0xff,0xff ; 83
+      .db     0x7b,0x5b ; 84
+      .db     0x2b,0x3d ; 85
+      .db     0xff,0xff ; 86
+      .db     0xff,0xff ; 87
+      .db     0xff,0xff ; 88
+      .db     0x80,0x80 ; 89
+      .db     0x0d,0x0d ; 90
+      .db     0x7d,0x5d ; 91
+      .db     0xff,0xff ; 92
+      .db     0x7c,0x5c ; 93
+      .db     0xff,0xff ; 94
+      .db     0xff,0xff ; 95
+      .db     0xff,0xff ; 96
+      .db     0xff,0xff ; 97
+      .db     0xff,0xff ; 98
+      .db     0xff,0xff ; 99
+      .db     0xff,0xff ; 100
+      .db     0xff,0xff ; 101
+      .db     0x08,0x08 ; 102
+      .db	  0xff,0xff ; 103
+      .db     0xff,0xff ; 104
+      .db     0xff,0xff ; 105
+      .db     0xff,0xff ; 106
+      .db     0xff,0xff ; 107
+      .db     0xff,0xff ; 108
+      .db     0xff,0xff ; 109
+      .db     0xff,0xff ; 110
+      .db     0xff,0xff ; 111
+      .db     0xff,0xff ; 112
+      .db     0xff,0xff ; 113
+      .db     0xff,0xff ; 114
+      .db     0xff,0xff ; 115
+      .db     0xff,0xff ; 116
+      .db     0xff,0xff ; 117
+      .db     0x1b,0x1b ; 118
 keytab2:
-      db      009H, 009H ; 13
-      db      01eH, 000H ; 14
-      db      0ffH, 0ffH ; 15
-      db      0ffH, 0ffH ; 16
-      db      0ffH, 0ffH ; 17
-      db      080H, 080H ; 18
-      db      0ffH, 0ffH ; 19
-      db      081H, 081H ; 20
-      db      011H, 011H ; 21
-      db      021H, 031H ; 22
-      db      0ffH, 0ffH ; 23
-      db      0ffH, 0ffH ; 24
-      db      0ffH, 0ffH ; 25
-      db      01aH, 01aH ; 26
-      db      013H, 013H ; 27
-      db      001H, 001H ; 28
-      db      017H, 017H ; 29
-      db      000H, 000H ; 30
-      db      0ffH, 0ffH ; 31
-      db      0ffH, 0ffH ; 32
-      db      003H, 003H ; 33
-      db      018H, 018H ; 34
-      db      004H, 004H ; 35
-      db      005H, 005H ; 36
-      db      024H, 01cH ; 37
-      db      023H, 01bH ; 38
-      db      0ffH, 0ffH ; 39
-      db      0ffH, 0ffH ; 40
-      db      000H, 000H ; 41
-      db      016H, 016H ; 42
-      db      006H, 006H ; 43
-      db      014H, 014H ; 44
-      db      012H, 012H ; 45
-      db      025H, 01dH ; 46
-      db      0ffH, 0ffH ; 47
-      db      0ffH, 0ffH ; 48
-      db      00eH, 00eH ; 49
-      db      002H, 002H ; 50
-      db      008H, 008H ; 51
-      db      007H, 007H ; 52
-      db      019H, 019H ; 53
-      db      01eH, 01eH ; 54
-      db      0ffH, 0ffH ; 55
-      db      0ffH, 0ffH ; 56
-      db      0ffH, 0ffH ; 57
-      db      00dH, 00dH ; 58
-      db      00aH, 00aH ; 59
-      db      015H, 015H ; 60
-      db      026H, 01fH ; 61
-      db      02aH, 07fH ; 62
-      db      0ffH, 0ffH ; 63
-      db      0ffH, 0ffH ; 64
-      db      03cH, 02cH ; 65
-      db      00bH, 00bH ; 66
-      db      009H, 009H ; 67
-      db      00fH, 00fH ; 68
-      db      029H, 030H ; 69
-      db      028H, 039H ; 70
-      db      0ffH, 0ffH ; 71
-      db      0ffH, 0ffH ; 72
-      db      03eH, 02eH ; 73
-      db      03fH, 01fH ; 74
-      db      00cH, 00cH ; 75
-      db      03aH, 03bH ; 76
-      db      010H, 010H ; 77
-      db      01fH, 02dH ; 78
-      db      0ffH, 0ffH ; 79
-      db      0ffH, 0ffH ; 80
-      db      0ffH, 0ffH ; 81
-      db      022H, 027H ; 82
-      db      0ffH, 0ffH ; 83
-      db      01bH, 01bH ; 84
-      db      02bH, 03dH ; 85
-      db      0ffH, 0ffH ; 86
-      db      0ffH, 0ffH ; 87
-      db      0ffH, 0ffH ; 88
-      db      080H, 080H ; 89
-      db      00dH, 00dH ; 90
-      db      01dH, 01dH ; 91
-      db      0ffH, 0ffH ; 92
-      db      01cH, 01cH ; 93
-      db      0ffH, 0ffH ; 94
-      db      0ffH, 0ffH ; 95
-      db      0ffH, 0ffH ; 96
-      db      0ffH, 0ffH ; 97
-      db      0ffH, 0ffH ; 98
-      db      0ffH, 0ffH ; 99
-      db      0ffH, 0ffH ; 100
-      db      0ffH, 0ffH ; 101
-      db      008H, 008H ; 102
-      db      0ffH, 0ffH ; 103
-      db      0ffH, 0ffH ; 104
-      db      0ffH, 0ffH ; 105
-      db      0ffH, 0ffH ; 106
-      db      0ffH, 0ffH ; 107
-      db      0ffH, 0ffH ; 108
-      db      0ffH, 0ffH ; 109
-      db      0ffH, 0ffH ; 110
-      db      0ffH, 0ffH ; 111
-      db      0ffH, 0ffH ; 112
-      db      0ffH, 0ffH ; 113
-      db      0ffH, 0ffH ; 114
-      db      0ffH, 0ffH ; 115
-      db      0ffH, 0ffH ; 116
-      db      0ffH, 0ffH ; 117
-      db      01bH, 01bH ; 118
-	end
+      .db     0x09,0x09 ; 13
+      .db     0x1e,0x00 ; 14
+      .db     0xff,0xff ; 15
+      .db     0xff,0xff ; 16
+      .db     0xff,0xff ; 17
+      .db     0x80,0x80 ; 18
+      .db     0xff,0xff ; 19
+      .db     0x81,0x81 ; 20
+      .db     0x11,0x11 ; 21
+      .db     0x21,0x31 ; 22
+      .db     0xff,0xff ; 23
+      .db     0xff,0xff ; 24
+      .db     0xff,0xff ; 25
+      .db     0x1a,0x1a ; 26
+      .db     0x13,0x13 ; 27
+      .db     0x01,0x01 ; 28
+      .db     0x17,0x17 ; 29
+      .db     0x00,0x00 ; 30
+      .db     0xff,0xff ; 31
+      .db     0xff,0xff ; 32
+      .db     0x03,0x03 ; 33
+      .db     0x18,0x18 ; 34
+      .db     0x04,0x04 ; 35
+      .db     0x05,0x05 ; 36
+      .db     0x24,0x1c ; 37
+      .db     0x23,0x1b ; 38
+      .db     0xff,0xff ; 39
+      .db     0xff,0xff ; 40
+      .db     0x00,0x00 ; 41
+      .db     0x16,0x16 ; 42
+      .db     0x06,0x06 ; 43
+      .db     0x14,0x14 ; 44
+      .db     0x12,0x12 ; 45
+      .db     0x25,0x1d ; 46
+      .db     0xff,0xff ; 47
+      .db     0xff,0xff ; 48
+      .db     0x0e,0x0e ; 49
+      .db     0x02,0x02 ; 50
+      .db     0x08,0x08 ; 51
+      .db     0x07,0x07 ; 52
+      .db     0x19,0x19 ; 53
+      .db     0x1e,0x1e ; 54
+      .db     0xff,0xff ; 55
+      .db     0xff,0xff ; 56
+      .db     0xff,0xff ; 57
+      .db     0x0d,0x0d ; 58
+      .db     0x0a,0x0a ; 59
+      .db     0x15,0x15 ; 60
+      .db     0x26,0x1f ; 61
+      .db     0x2a,0x7f ; 62
+      .db     0xff,0xff ; 63
+      .db     0xff,0xff ; 64
+      .db     0x3c,0x2c ; 65
+      .db     0x0b,0x0b ; 66
+      .db     0x09,0x09 ; 67
+      .db     0x0f,0x0f ; 68
+      .db     0x29,0x30 ; 69
+      .db     0x28,0x39 ; 70
+      .db     0xff,0xff ; 71
+      .db     0xff,0xff ; 72
+      .db     0x3e,0x2e ; 73
+      .db     0x3f,0x1f ; 74
+      .db     0x0c,0x0c ; 75
+      .db     0x3a,0x3b ; 76
+      .db     0x10,0x10 ; 77
+      .db     0x1f,0x2d ; 78
+      .db     0xff,0xff ; 79
+      .db     0xff,0xff ; 80
+      .db     0xff,0xff ; 81
+      .db     0x22,0x27 ; 82
+      .db     0xff,0xff ; 83
+      .db     0x1b,0x1b ; 84
+      .db     0x2b,0x3d ; 85
+      .db     0xff,0xff ; 86
+      .db     0xff,0xff ; 87
+      .db     0xff,0xff ; 88
+      .db     0x80,0x80 ; 89
+      .db     0x0d,0x0d ; 90
+      .db     0x1d,0x1d ; 91
+      .db     0xff,0xff ; 92
+      .db     0x1c,0x1c ; 93
+      .db     0xff,0xff ; 94
+      .db     0xff,0xff ; 95
+      .db     0xff,0xff ; 96
+      .db     0xff,0xff ; 97
+      .db     0xff,0xff ; 98
+      .db     0xff,0xff ; 99
+      .db     0xff,0xff ; 100
+      .db     0xff,0xff ; 101
+      .db     0x08,0x08 ; 102
+      .db     0xff,0xff ; 103
+      .db     0xff,0xff ; 104
+      .db     0xff,0xff ; 105
+      .db     0xff,0xff ; 106
+      .db     0xff,0xff ; 107
+      .db     0xff,0xff ; 108
+      .db     0xff,0xff ; 109
+      .db     0xff,0xff ; 110
+      .db     0xff,0xff ; 111
+      .db     0xff,0xff ; 112
+      .db     0xff,0xff ; 113
+      .db     0xff,0xff ; 114
+      .db     0xff,0xff ; 115
+      .db     0xff,0xff ; 116
+      .db     0xff,0xff ; 117
+      .db     0x1b,0x1b ; 118
