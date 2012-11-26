@@ -17,12 +17,12 @@
 
 void dacout(void);
 extern bit dacactive;
-extern uint16 bytesleft;
-extern uint8 xdata *bufptr;     //##
+extern uint16_t bytesleft;
+extern uint8_t xdata *bufptr;     //##
 
 bit isStereo;
-int8 volumeL;
-int8 volumeR;
+int8_t volumeL;
+int8_t volumeR;
 
 void dac2init(void){
 /*  initalizes any global variables used. */
@@ -31,7 +31,7 @@ void dac2init(void){
     volumeR = 0;
 }
 
-void dacrate(uint16 rate) {
+void dacrate(uint16_t rate) {
     switch(rate){
         case 8000:
             RCAP2 = -128; // 0.47% percent error
@@ -48,12 +48,12 @@ void dacrate(uint16 rate) {
     return;
 }
 
-void dacstereo(uint8 channel) {
+void dacstereo(uint8_t channel) {
     isStereo = channel ? 1 : 0;
     return;
 }
 
-void dacvolume(int8 ud) {
+void dacvolume(int8_t ud) {
     if (ud > 0) {
       //increase volume
         if (volumeL < MAX_VOLUME && volumeR < MAX_VOLUME) {
@@ -76,7 +76,7 @@ void dacvolume(int8 ud) {
     }
 }
 
-void dacbalance(int8 lr) {
+void dacbalance(int8_t lr) {
     if (lr > 0) { // left++, right--
         if (volumeL < MAX_VOLUME && volumeR > MIN_VOLUME) {
             volumeL++; volumeR--;

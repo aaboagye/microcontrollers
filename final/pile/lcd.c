@@ -22,8 +22,8 @@ uint8_t _mpurcmd();
 void _busy();                       // wait on busy flag
 
 // global vars
-const uint8_t lcdrs = 0x02;
-const uint8_t lcdrw = 0x01;
+const uint8_t lcdrs;
+const uint8_t lcdrw;
 uint8_t pdata *lcdbase;
 uint8_t pdata *lcdwdata;
 uint8_t pdata *lcdwcmd;
@@ -40,7 +40,8 @@ void lcdinit() {
     P4MDOUT = 0xC0;                   //read and write control
     P6MDOUT = 0xFF;                   //address lines
     P7MDOUT = 0xFF;                   //data lines
-
+    lcdrs = 0x02;
+    lcdrw = 0x01;
     // external pointer config
     lcdbase  = 0xB4;
     lcdwdata = lcdbase + lcdrs;
