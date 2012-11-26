@@ -1,6 +1,6 @@
 #include "lcd.h"
 #include "delay.h"
-#include <c8051f120.h>          // get SFR declarations
+#include <C8051F120.h>          // get SFR declarations
 
 // hackros
 #define lcdwstr()    while (*str) {_lcddata(*str); ++str;}
@@ -24,11 +24,11 @@ void _busy();                       // wait on busy flag
 // global vars
 const uint8_t lcdrs = 0x02;
 const uint8_t lcdrw = 0x01;
-uint8_t pdata *lcdbase;
-uint8_t pdata *lcdwdata;
-uint8_t pdata *lcdwcmd;
-uint8_t pdata *lcdrdata;
-uint8_t pdata *lcdrcmd;
+uint8_t __pdata *lcdbase;
+uint8_t __pdata *lcdwdata;
+uint8_t __pdata *lcdwcmd;
+uint8_t __pdata *lcdrdata;
+uint8_t __pdata *lcdrcmd;
 
 // public functions
 void lcdinit() {
@@ -62,11 +62,11 @@ void lcdwrite(uint8_t *str) {
     lcdwstr();
 }
 
-void lcdwritec(uint8_t code *str) {
+void lcdwritec(uint8_t __code *str) {
     lcdwstr();
 }
 
-void lcdwritex(uint8_t xdata *str) {
+void lcdwritex(uint8_t __xdata *str) {
     lcdwstr();
 }
 

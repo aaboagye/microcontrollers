@@ -1,4 +1,4 @@
-#include <c8051f120.h>          // get SFR declarations
+#include <C8051F120.h>          // get SFR declarations
 #include "lcd.h"
 
 int main() {
