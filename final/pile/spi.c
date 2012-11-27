@@ -88,7 +88,7 @@ uint8_t spi_rcv_byte(){
 }
 
 //sends multiple bytes (normally a SD card sector) over the SPI bus.
-void spi_rcv_buffer(uint16_t len, uint8_t xdata *buffer){
+void spi_rcv_buffer(uint16_t len, uint8_t __xdata *buffer){
     //### int i;
     spi_cs_assert();
     //### for(i = 0; i < len; i++)

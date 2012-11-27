@@ -7,18 +7,18 @@
 //#pragma optimize(9,size)
 #pragma opt_code_size
 
-static uint8 idata response[5];
-static int32 xdata argument_l;
+static uint8 __idata response[5];
+static int32 __xdata argument_l;
 
 uint32 ntohl(uint32 netlong);
 uint16 ntohs(uint16 netshort);
 
-// static sd_context_t xdata sdc;
+// static sd_context_t __xdata sdc;
 static uint16 sdc_timeout_write;
 static uint16 sdc_timeout_read;
 static uint8 sdc_busyflag;
 
-/* This function initializes the SD card. It returns 1 if initialization 
+/* This function initializes the SD card. It returns 1 if initialization
 was successful, 0 otherwise.
    sd_context_t *sdc -- pointer to a data structure containing
                       information about the card. For now, the
@@ -112,7 +112,7 @@ This is a block address, not a linear address.
 unsigned char *data -- The data, a pointer to an array of unsigned
 chars.
 */
-char microSDread (uint32 blockaddr, unsigned char xdata *_data)
+char microSDread (uint32 blockaddr, unsigned char __xdata *_data)
 {
   unsigned char i = 0;
   unsigned char tmp;
@@ -181,7 +181,7 @@ static int sd_send_command(
   char i;
   char response_length;
   unsigned char tmp;
-  unsigned char xdata *ptr = (unsigned char *)&argument_l;
+  unsigned char __xdata *ptr = (unsigned char *)&argument_l;
   spi_cs_assert();
   /* All data is sent MSB first, and MSb first */
   /* Send the header/command */

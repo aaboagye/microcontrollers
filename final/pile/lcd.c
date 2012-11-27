@@ -42,7 +42,7 @@ void lcdinit() {
     P7MDOUT = 0xFF;                   //data lines
 
     // external pointer config
-    lcdbase  = 0xB4;
+    lcdbase  = (uint8_t)0xB4;
     lcdwdata = lcdbase + lcdrs;
     lcdwcmd  = lcdbase;
     lcdrdata = lcdbase + lcdrw + lcdrs;

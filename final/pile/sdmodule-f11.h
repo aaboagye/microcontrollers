@@ -5,7 +5,7 @@
 
 
 uint8 microSDinit( void );
-char microSDread (uint32 blockaddr, unsigned char xdata *_data);
+char microSDread (uint32 blockaddr, unsigned char __xdata *_data);
 
 static int sd_initialize( void );
 static void sd_wait_notbusy ( void );

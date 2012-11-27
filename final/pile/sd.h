@@ -13,6 +13,6 @@ uint8_t microSDinit();
     you will use – repeatedly.  It is passed a sector number on the SD card and a pointer to a 512-
     byte buffer.  It will attempt to read a sector from the SD card.  If the read is successful it will 
     return a non-zero value, otherwise it returns a zero. */
-uint8_t microSDread(uint32_t blockaddr, uint8_t xdata *buffer);
+uint8_t microSDread(uint32_t blockaddr, uint8_t __xdata *buffer);
 
 #endif

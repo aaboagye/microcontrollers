@@ -6,13 +6,13 @@
 #include "dac.h"
 #include "readdir.h"
 
-//#pragma code                        // Include ASM in .LST file
+//#pragma __code                        // Include ASM in .LST file
 void kbinit ( void );
 uint8_t kbcheck ( void );
 void dacinit ( void );
 
 int main(void){
-    SD_data xdata dat;
+    SD_data __xdata dat;
 
     //init procedures
     SFRPAGE = 0x0F;

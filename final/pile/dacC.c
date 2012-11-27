@@ -1,4 +1,4 @@
-// all code seems to be functional
+// all __code seems to be functional
 
 // volume control:  take 8-bit value DAC and shift left 4 bits; write these
 // bits into DACnH and DACnL.   volume then controls bits 0-2 of DACnCN.  max
@@ -7,22 +7,22 @@
 #include <C8051F120.h>
 #include "types.h"
 
-extern bit dacactive;
+extern __bit dacactive;
 extern uint16_t bytesleft;
-extern uint8_t xdata *bufptr;
+extern uint8_t __xdata *bufptr;
 
-static bit isStereo;
+static __bit isStereo;
 static int8_t volumeL, volumeR;
 
 /*sfr16 RCAP2 = 0xca;
 sfr16 TMR2 = 0xcc;*/
-sfr16 DAC = 0xd2;
+__sfr16 __at (0xD2) DAC;
 
 #define RATE8K   -1531          // 12.25MHz/1531 = 8.001KHz (0.16% error)
 #define RATE11K  -1111          // 12.25MHz/1111 = 11.026KHz (0.01% error)
 #define RATE22K  -555           // 12.25MHz/555 = 22.072KHz (0.10% error)
 
-static void dacout (void) interrupt 5
+static void dacout (void) __interrupt (5)
 {
   uint8_t valL = 0x80;
   uint8_t valR = 0x80;
@@ -69,8 +69,8 @@ static void setVolR( int8_t vol )
   }
 }
 
-// This procedure initializes global variables used by for your C code.
-void dac2init (void) 
+// This procedure initializes global variables used by for your C __code.
+void dac2init (void)
 {
   volumeL = volumeR = 2;
   setVolL( 0 );
@@ -107,7 +107,7 @@ void dacstereo( uint8_t channels )
 // variables volumeL and volumeR (i.e., the amplitude of the DAC outputs). A
 // positive value increases the volume, a negative value decreases it. If
 // the volume of either channels is at the maximum or minimum, it has no
-// effect. Your code should support at least three volume levels (you may
+// effect. Your __code should support at least three volume levels (you may
 // want to include more, which is OK, just don't go nuts).
 
 void dacvolume(int8_t ud)

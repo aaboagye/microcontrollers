@@ -35,6 +35,6 @@ void spi_send_byte(uint8_t input);
 uint8_t spi_rcv_byte();
 
 //sends multiple bytes (normally a SD card sector) over the SPI bus.  The code for this procedure was given earlier.
-void spi_rcv_buffer(uint16_t len, uint8_t xdata *buffer);
+void spi_rcv_buffer(uint16_t len, uint8_t __xdata *buffer);
 
 #endif
