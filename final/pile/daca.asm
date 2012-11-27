@@ -10,7 +10,27 @@
 ;                   checking to see if the DAC is busy.
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.module daca
+;------
+; Pseduo register hacks
+;-----
+.globl ar0
+.globl ar1
+.globl ar2
+.globl ar3
+.globl ar4
+.globl ar5
+.globl ar6
+.globl ar7
 
+ar0 = 0x0000
+ar1 = 0x0001
+ar2 = 0x0002
+ar3 = 0x0003
+ar4 = 0x0004
+ar5 = 0x0005
+ar6 = 0x0006
+ar7 = 0x0007
 ;------------------------------------------------------------------------------
 ; The "include"...
 ;------------------------------------------------------------------------------
@@ -797,58 +817,61 @@ _P7_7	=	0x00ff
 	.ds 8
 
 ; The .globl directive makes these public.
-.globl	bytesleft
-.globl	bufptr
-.globl	dacactive
-.globl	dacinit
-.globl	dacbusy
+.globl	_bytesleft
+.globl	_bufptr
+.globl	_dacactive
+.globl	_dacinit
+.globl	_dacbusy
 .globl	_dacplay
+.globl	_dacplay_PARM_2
 
-
+.area DSEG (DATA)
+_dacplay_PARM_2:
+	.ds 1
 ;---------------
 ; dac_bits segment
 ;---------------
 	.area dac_bits	(BIT,REL)
-	dacactive = 0x0000
+	_dacactive = 0x0000
 	.area dacint (DATA,REL)
-bytesleft:      .ds      2           ;1st byte is the low.
-bufptr:         .ds      2
+_bytesleft:      .ds      2           ;1st byte is the low.
+_bufptr:         .ds      2
 
 	.area daccode (CODE,REL)
-dacinit:
+_dacinit:
 ;;initialise global vars
-            mov SFRPAGE,#0
-            clr dacactive
-            orl DAC0CN,#0h98         ;enable DAC and watch on T2 overflow
-            mov SFRPAGE,#1
-            orl DAC1CN,#0h98
-            mov SFRPAGE,#0
+            mov _SFRPAGE,#0
+            clr _dacactive
+            orl _DAC0CN,#0h98         ;enable DAC and watch on T2 overflow
+            mov _SFRPAGE,#1
+            orl _DAC1CN,#0h98
+            mov _SFRPAGE,#0
             setb ET2                ;setup T2 interrupt
-            orl P1MDOUT,#0h40        ;fixes "shark-fin" square wave
-            orl REF0CN,#0h03
-            setb PT2
-            clr TF2
-            setb TR2
-            orl TMR2CF,#0h02
-            mov SFRPAGE,#0h0F
-            orl XBR1,#0h20           ;setup  T2 toggle output XBR
-            mov SFRPAGE,#0
+            orl _P1MDOUT,#0h40        ;fixes "shark-fin" square wave
+            orl _REF0CN,#0h03
+            setb _PT2
+            clr _TF2
+            setb _TR2
+            orl _TMR2CF,#0h02
+            mov _SFRPAGE,#0h0F
+            orl _XBR1,#0h20           ;setup  T2 toggle output XBR
+            mov _SFRPAGE,#0
             ;mov RCAP2H,#HIGH(-128)   ;set reload value
 			mov RCAP2H,#0
             ;mov RCAP2L,#LOW(-128)
 			mov RCAP2L,#0h80
-            mov DAC0H,#0h08
-            mov DAC0L,#0h00           ;not sure if we need to put this here?
-            mov SFRPAGE,#1
-            mov DAC1H,#0h08
-            mov DAC1L,#0h00           ;not sure if we need to put this here?
-            mov SFRPAGE,#0
+            mov _DAC0H,#0h08
+            mov _DAC0L,#0h00           ;not sure if we need to put this here?
+            mov _SFRPAGE,#1
+            mov _DAC1H,#0h08
+            mov _DAC1L,#0h00           ;not sure if we need to put this here?
+            mov _SFRPAGE,#0
 
             ret
 
-dacbusy:
-            ;return 0 in R7 if dacactive is not set
-            jb      dacactive,notbusy
+_dacbusy:
+            ;return 0 in R7 if _dacactive is not set
+            jb      _dacactive,notbusy
             mov     R7,#0
             ret
   notbusy:  mov     R7,#1
@@ -857,17 +880,17 @@ dacbusy:
 
 _dacplay:
             ;copy count(R6,R7) to bytesleft
-            mov R0,#bytesleft
-            mov @R0,AR6              ;assuming R7 is low byte.
+            mov R0,#_bytesleft
+            mov @R0,ar6              ;assuming R7 is low byte.
             inc R0
-            mov @R0,AR7
+            mov @R0,ar7
 
             ;copy buffer(R4,R5) to bufptr
-            mov R0,#bufptr
-            mov @R0,AR4              ;assuming R5 is low byte.
+            mov R0,#_bufptr
+            mov @R0,ar4              ;assuming R5 is low byte.
             inc R0
-            mov @R0,AR5
+            mov @R0,ar5
 
-            setb dacactive
+            setb _dacactive
             ret
 

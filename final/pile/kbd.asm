@@ -15,6 +15,7 @@
 ;
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.module kbd
 ;------------------------------------------------------------------------------
 ; The "include"...
 ;------------------------------------------------------------------------------
@@ -800,8 +801,8 @@ _P7_7	=	0x00ff
 	.area REG_BANK_0	(REL,OVR,DATA)
 	.ds 8
 
-.globl	kbinit
-.globl	kbcheck
+.globl	_kbinit
+.globl	_kbcheck
 
 QUEUELEN =    4                                   ; queue holds four characters
 
@@ -835,14 +836,14 @@ breaked = 0x0007
  
 .area kbdcode (CODE,REL)
 
-kbinit:
+_kbinit:
         ;extrn   code(keytab, keytab2), number(minkey, maxkey)
 		.globl	keytab
 		.globl	keytab2
 		.globl	minkey
 		.globl	maxkey
-        aparity     =     _PSW_0                   ; psw even parity bit for A
-        kbpin       =     _P2_2
+        aparity     =     PSW.0                   ; psw even parity bit for A
+        kbpin       =     P2.2
         sc_error    =		0                   ; error code? i'm really just making stuff up at this point
         mov         state,#0
         clr         shifted
@@ -855,20 +856,20 @@ kbinit:
         mov     r0, #kbdq                           ; for testing, put "no character" value
         mov     @r0,#0x0ff                           ;   at the tail of the queue
 
-        mov     SFRPAGE,#0x0F
-        orl     IE,#1                               ; enable external interrupt
-        orl     IP,#1
-        orl     XBR1,#0b00000100
-        mov     SFRPAGE,#0
-        setb    IT0
+        mov     _SFRPAGE,#0x0F
+        orl     _IE,#1                               ; enable external interrupt
+        orl     _IP,#1
+        orl     _XBR1,#0b00000100
+        mov     _SFRPAGE,#0
+        setb    _IT0
         ret
 
 kbprocess:
-        push    ACC                                 ; save general registers' state
-        push    B
-        push    DPH
-        push    DPL
-        push    PSW
+        push    _ACC                                 ; save general registers' state
+        push    _B
+        push    _DPH
+        push    _DPL
+        push    _PSW
         mov     A,state
         rl      A                                   ; x2 to account for ajmp in table
         mov     DPTR,#table
@@ -1007,7 +1008,7 @@ done:
         pop     _ACC
         reti                                         ;from kbprocess
 
-kbcheck:
+_kbcheck:
         push    acc
 ;;;;    REMOVE THESE 4 LINES WHEN YOU HAVE IMPLEMENTED RING BUFFER INSERTION
 ;        mov     a,#0ffH         ; get "no character" value

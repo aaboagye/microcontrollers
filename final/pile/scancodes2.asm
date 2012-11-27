@@ -3,6 +3,7 @@
 ; other codes are ASCII values
 ; the values in the first column are shifted
 ;public	keytab, keytab2, minkey, maxkey
+.module scancodes2
 .globl keytab
 .globl keytab2
 .globl minkey
