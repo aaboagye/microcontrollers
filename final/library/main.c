@@ -59,7 +59,12 @@ int main(void){
 */
 
     while(1){
-        while(!spicardpresent());   // Wait until card is detected
+        while(!spicardpresent()){   // Wait until card is detected
+            lcdpos(0,0);
+            lcdwrite("Insert microSD");
+            lcdpos(1,0);
+            lcdwrite("card...");
+        };
         if(!microSDinit()){         // If initialization fails, print error.
             lcdclear();
             lcdpos(0,0);
@@ -86,7 +91,7 @@ int main(void){
                     bytestoplay = ntohl(header.subchunk2Size);
                     lcdclear();
                     lcdpos(0,0);
-                    lcdwrite(i); lcdwrite(":");
+                    lcdwrite((uint8_t *) i); lcdwrite(":");
                     lcdwrite(header.artist);
                     lcdpos(1,0);
                     lcdwrite(header.title);
@@ -112,6 +117,22 @@ int main(void){
                                 bytestoplay = 0; // Done playing song.
                             }
                             microSDread(current_sector + bytesread, buffer[ping]);
+                            switch(kbcheck()){
+                                case '+':
+                                    dacvolume(1);
+                                    break;
+                                case '-':
+                                    dacvolume(0);
+                                    break;
+                                case '>':
+                                    dacbalance(0);
+                                    break;
+                                case '<':
+                                    dacbalance(1);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                 }
