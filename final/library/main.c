@@ -39,25 +39,6 @@ int main(void){
     dacrate(11025);
     dacstereo(0);                   // Set number of channels to mono
 
-/*
-    while(1) {
-        uint8_t temp[1];
-        PCON |= 1;
-        temp[0] = kbcheck();
-        if (temp[0] == 13) {
-            lcdclear();
-            lcdpos(0,0);
-        }
-        else if (temp[0] == 8) {
-            _lcdcmd(0x10);
-            lcdwrite(" ");
-            _lcdcmd(0x10);
-        }
-        else if (temp[0] != 255)
-            lcdwrite(temp);
-    }
-*/
-
     while(1){
         while(!spicardpresent()){   // Wait until card is detected
             lcdpos(0,0);
@@ -119,16 +100,70 @@ int main(void){
                             microSDread(current_sector + bytesread, buffer[ping]);
                             switch(kbcheck()){
                                 case '+':
+                                case '=':
                                     dacvolume(1);
                                     break;
                                 case '-':
+                                case '_':
                                     dacvolume(0);
                                     break;
                                 case '>':
+                                case '.':
                                     dacbalance(0);
                                     break;
                                 case '<':
+                                case ',':
                                     dacbalance(1);
+                                    break;
+                                case 'n':
+                                case 'N':
+                                    ++i;
+                                    i %= numSongs-1; //next song with wrap around
+                                    break;
+                                case 'l':
+                                case 'L':
+                                    --i;
+                                    i %= numSongs-1; //previous song with wrap
+                                    break;
+                                case '0':
+                                case ')':
+                                    i = 0;
+                                    break;
+                                case '1':
+                                case '!':
+                                    i = 1;
+                                    break;
+                                case '2':
+                                case '@':
+                                    i = 2;
+                                    break;
+                                case '3':
+                                case '#';
+                                    i = 3;
+                                    break;
+                                case '4':
+                                case '$':
+                                    i = 4;
+                                    break;
+                                case '5':
+                                case '%':
+                                    i = 5;
+                                    break;
+                                case '6':
+                                case '^':
+                                    i = 6;
+                                    break;
+                                case '7':
+                                case '&':
+                                    i = 7;
+                                    break;
+                                case '8':
+                                case '*':
+                                    i = 8;
+                                    break;
+                                case '9':
+                                case '(':
+                                    i = 9;
                                     break;
                                 default:
                                     break;
