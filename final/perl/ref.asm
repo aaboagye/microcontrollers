@@ -10,13 +10,13 @@ BYTESLEFT		EQU		0044H
 public		BYTESLEFT
 DACACTIVE		EQU		0022H.2
 public		DACACTIVE
-DACBUSY		EQU		4BC0H
+DACBUSY		EQU		4BB8H
 public		DACBUSY
-DACINIT		EQU		4B7CH
+DACINIT		EQU		4B74H
 public		DACINIT
-_DACPLAY		EQU		4BC9H
+_DACPLAY		EQU		4BC1H
 public		_DACPLAY
-dacout		EQU		4884H
+dacout		EQU		487FH
 public		dacout
 ADC0CN		EQU		00E8H
 public		ADC0CN
@@ -24,17 +24,17 @@ SFRPAGE		EQU		0084H
 public		SFRPAGE
 IE		EQU		00A8H
 public		IE
-dac2init		EQU		4E35H
+dac2init		EQU		4E2DH
 public		dac2init
 PCA0CN		EQU		00D8H
 public		PCA0CN
 IP		EQU		00B8H
 public		IP
-_dacstereo		EQU		4E0EH
+_dacstereo		EQU		4E06H
 public		_dacstereo
 SMB0CN		EQU		00C0H
 public		SMB0CN
-_dacvolume		EQU		4ABCH
+_dacvolume		EQU		4AB4H
 public		_dacvolume
 CPT0CN		EQU		0088H
 public		CPT0CN
@@ -42,7 +42,7 @@ SPI0CN		EQU		00F8H
 public		SPI0CN
 DACn		EQU		00D2H
 public		DACn
-_dacrate		EQU		4CC9H
+_dacrate		EQU		4CC1H
 public		_dacrate
 TMR2CN		EQU		00C8H
 public		TMR2CN
@@ -52,7 +52,7 @@ TF2		EQU		00C8H.7
 public		TF2
 isStereo		EQU		0022H.3
 public		isStereo
-_dacbalance		EQU		4B1DH
+_dacbalance		EQU		4B15H
 public		_dacbalance
 RCAP2		EQU		00CAH
 public		RCAP2
@@ -64,21 +64,21 @@ volumeR		EQU		0053H
 public		volumeR
 PSW		EQU		00D0H
 public		PSW
-_delay_ms		EQU		4C5EH
+_delay_ms		EQU		4C56H
 public		_delay_ms
-_delay_us		EQU		4C26H
+_delay_us		EQU		4C1EH
 public		_delay_us
-_itoa8		EQU		49D1H
+_itoa8		EQU		49CCH
 public		_itoa8
 _itoa16		EQU		4535H
 public		_itoa16
-KBCHECK		EQU		47A5H
+KBCHECK		EQU		47A0H
 public		KBCHECK
-KBINIT		EQU		4687H
+KBINIT		EQU		4682H
 public		KBINIT
 P4MDOUT		EQU		009CH
 public		P4MDOUT
-__lcddata		EQU		4E18H
+__lcddata		EQU		4E10H
 public		__lcddata
 P6MDOUT		EQU		009EH
 public		P6MDOUT
@@ -92,25 +92,25 @@ EMI0CN		EQU		00A2H
 public		EMI0CN
 lcdrw		EQU		002CH
 public		lcdrw
-_busy		EQU		4E3DH
+_busy		EQU		4E35H
 public		_busy
-_lcdwritec		EQU		4D56H
+_lcdwritec		EQU		4D4EH
 public		_lcdwritec
-__mpuwdata		EQU		4E58H
+__mpuwdata		EQU		4E50H
 public		__mpuwdata
-__lcdcmd		EQU		4E22H
+__lcdcmd		EQU		4E1AH
 public		__lcdcmd
-_lcdcursor		EQU		4E2CH
+_lcdcursor		EQU		4E24H
 public		_lcdcursor
-_lcdwritex		EQU		4D73H
+_lcdwritex		EQU		4D6BH
 public		_lcdwritex
-lcdclear		EQU		4E53H
+lcdclear		EQU		4E4BH
 public		lcdclear
-__mpuwcmd		EQU		4E5DH
+__mpuwcmd		EQU		4E55H
 public		__mpuwcmd
-_mpurdata		EQU		4E62H
+_mpurdata		EQU		4E5AH
 public		_mpurdata
-_lcdwrite		EQU		4CF6H
+_lcdwrite		EQU		4CEEH
 public		_lcdwrite
 lcdrdata		EQU		002DH
 public		lcdrdata
@@ -118,15 +118,15 @@ lcdwdata		EQU		002EH
 public		lcdwdata
 lcdbase		EQU		002FH
 public		lcdbase
-_mpurcmd		EQU		4E67H
+_mpurcmd		EQU		4E5FH
 public		_mpurcmd
 lcdrcmd		EQU		0030H
 public		lcdrcmd
 lcdwcmd		EQU		0031H
 public		lcdwcmd
-_lcdpos		EQU		4DAAH
+_lcdpos		EQU		4DA2H
 public		_lcdpos
-lcdinit		EQU		4BDAH
+lcdinit		EQU		4BD2H
 public		lcdinit
 KEYTAB		EQU		4236H
 public		KEYTAB
@@ -144,13 +144,13 @@ SPIEN		EQU		00F8H.0
 public		SPIEN
 P2		EQU		00A0H
 public		P2
-spiinit		EQU		4D38H
+spiinit		EQU		4D30H
 public		spiinit
 P0MDOUT		EQU		00A4H
 public		P0MDOUT
 P2MDOUT		EQU		00A6H
 public		P2MDOUT
-spi_rcv_byte		EQU		4DF8H
+spi_rcv_byte		EQU		4DF0H
 public		spi_rcv_byte
 CS		EQU		00A0H.0
 public		CS
@@ -164,21 +164,21 @@ NSSMD0		EQU		00F8H.2
 public		NSSMD0
 NSSMD1		EQU		00F8H.3
 public		NSSMD1
-_spi_rcv_buffer		EQU		4C95H
+_spi_rcv_buffer		EQU		4C8DH
 public		_spi_rcv_buffer
-_spi_set_divisor		EQU		4DCDH
+_spi_set_divisor		EQU		4DC5H
 public		_spi_set_divisor
-spi_cs_deassert		EQU		4E6FH
+spi_cs_deassert		EQU		4E67H
 public		spi_cs_deassert
-_spi_send_byte		EQU		4E45H
+_spi_send_byte		EQU		4E3DH
 public		_spi_send_byte
 SPI0CFG		EQU		009AH
 public		SPI0CFG
-spicardpresent		EQU		4E4DH
+spicardpresent		EQU		4E45H
 public		spicardpresent
 SPI0DAT		EQU		009BH
 public		SPI0DAT
-spi_cs_assert		EQU		4E6CH
+spi_cs_assert		EQU		4E64H
 public		spi_cs_assert
 songSector		EQU		0200H
 public		songSector
@@ -186,13 +186,13 @@ readdir		EQU		43DEH
 public		readdir
 numSongs		EQU		0280H
 public		numSongs
-_microSDread		EQU		4A48H
+_microSDread		EQU		4A40H
 public		_microSDread
-microSDinit		EQU		4D19H
+microSDinit		EQU		4D11H
 public		microSDinit
-_NTOHL		EQU		4E03H
+_NTOHL		EQU		4DFBH
 public		_NTOHL
-_NTOHS		EQU		4E0AH
+_NTOHS		EQU		4E02H
 public		_NTOHS
 ?C?CLDPTR		EQU		4000H
 public		?C?CLDPTR

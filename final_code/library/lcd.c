@@ -1,5 +1,6 @@
 #include "lcd.h"
 #include "delay.h"
+#include "itoa.h"
 #include <c8051f120.h>          // get SFR declarations
 
 // hackros
@@ -70,6 +71,19 @@ void lcdwritec(uint8_t code *str) {
 void lcdwritex(uint8_t xdata *str) {
     lcdwstr();
 }
+
+void lcdwritei8(uint8_t i) {
+    char* a = "\0\0\0\0";
+    itoa8(i, a);
+    lcdwrite(a);
+}
+
+void lcdwritei16(uint16_t i) {
+    char* a = "\0\0\0\0\0\0";
+    itoa16(i, a);
+    lcdwrite(a);
+}
+
 
 void lcdpos(uint8_t row, uint8_t col) {
     _lcdcmd((0x80 | ((row & 0x01) << 6) | (col & 0x0F))); //lulz
