@@ -12,7 +12,7 @@
 void kbinit ( void );
 uint8_t kbcheck ( void );
 void dacinit ( void );
-void itoa(uint8_t i, char *a);
+void itoa8(uint8_t i, char *a);
 void itoa16(uint16_t i, char *a);
 void itoa32(uint32_t i, char *a);
 
@@ -108,7 +108,7 @@ char idata foo2;
                     bytestoplay = ntohl(header_ptr->subchunk2Size);
                     lcdclear();
                     lcdpos(0,0);
-                    itoa(i, itoa_buf);
+                    itoa8(i, itoa_buf);
                     lcdwrite(itoa_buf);
                     lcdwrite(":");
                     lcdwrite(header_ptr->artist);
@@ -274,13 +274,17 @@ void itoa32(uint32_t i, char *a) {
         a[p++] = i / 1000000 + 0x30;
         i %= 1000000;
     }
-    if (i > 999999) {
-        a[p++] = i / 1000000 + 0x30;
-        i %= 1000000;
+    if (i > 99999) {
+        a[p++] = i / 100000 + 0x30;
+        i %= 100000;
     }
-    if (i > 999999) {
-        a[p++] = i / 1000000 + 0x30;
-        i %= 1000000;
+    if (i > 9999) {
+        a[p++] = i / 10000 + 0x30;
+        i %= 10000;
+    }
+    if (i > 999) {
+        a[p++] = i /= 1000 + 0x30;
+        i %= 1000;
     }
     if (i > 99) {
         a[p++] = i / 100 + 0x30;
