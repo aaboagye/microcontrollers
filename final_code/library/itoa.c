@@ -14,15 +14,17 @@ void itoa8(uint8_t i, char *a) {
     uint8_t p = 0;
     uint8_t s = 3;
 
-    // DOCJK
+    // Calculate number of digits
     TEST(3) else
     TEST(2) else
-    TEST(1)
+    { s = 1; }
 
+    // use integer division and modulus to calculate each digit, saving it as ASCII to char* a
     switch(s) {
         MCASE(3);
         MCASE(2);
         MCASE(1);
+        default: break;
     }
 }
 
@@ -31,18 +33,20 @@ void itoa16(uint16_t i, char *a) {
     uint8_t s = 5;
     // max is 65,535
 
-    // DOCJK
+    // Calculate number of digits
     TEST(5) else
     TEST(4) else
     TEST(3) else
     TEST(2) else
-    TEST(1)
+    { s = 1; }
 
+    // use integer division and modulus to calculate each digit, saving it as ASCII to char* a
     switch(s) {
         MCASE(5);
         MCASE(4);
         MCASE(3);
         MCASE(2);
         MCASE(1);
+        default: break;
     }
 }
