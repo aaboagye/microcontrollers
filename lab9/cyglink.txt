@@ -1,2 +1,0 @@
-"C:\Users\jorr1\Downloads\microcontrollers-master\microcontrollers-master\lab9\SMBus.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\microcontrollers-master\lab9\SMBusTest.obj"  TO "C:\Users\jorr1\Downloads\microcontrollers-master\microcontrollers-master\lab9\prefs"  RS(256) PL(68) PW(78)  

@@ -1,9 +1,0 @@
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\daca.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\dacC.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\delay.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\kbd.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\lcd.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\spi.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\spi_test.obj",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\sd.OBJ",
-"C:\Users\jorr1\Downloads\microcontrollers-master\pile\scancodes2.obj"  TO "C:\Users\jorr1\Downloads\microcontrollers-master\pile\lab8" RS(256) PL(68) PW(78) 
