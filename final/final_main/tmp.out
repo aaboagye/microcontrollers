@@ -1,0 +1,15 @@
+
+BL51 BANKED LINKER/LOCATER V5.15 - SN: Cygnal_8051Fxxx
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2004
+"U:\microcontrollers\final_project\main\main.obj",
+"U:\microcontrollers\final_project\main\refs.obj"  TO "U:\microcontrollers\final_project\main\main" RS(256) PL(68) PW(78) data(0x005D) idata(0x0089) xdata(0x0285)  
+
+******************************************************************************
+* RESTRICTED VERSION WITH 1000H BYTE CODE SIZE LIMIT; USED: 068BH BYTE (40%) *
+******************************************************************************
+
+>> 
+>> 
+>> 
+Program Size: data=40.1 xdata=1028 code=1681
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

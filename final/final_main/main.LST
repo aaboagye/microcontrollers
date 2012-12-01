@@ -1,0 +1,264 @@
+C51 COMPILER V7.05   MAIN                                                                  12/01/2012 03:11:18 PAGE 1   
+
+
+C51 COMPILER V7.05, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\SiLabs\MCU\IDEfiles\C51\BIN\C51.exe main.c DB OE BR
+
+stmt level    source
+
+   1          #include <c8051f120.h>           // Get SFR declarations
+   2          #include "types.h"
+   3          #include "spi.h"
+   4          #include "lcd.h"
+   5          #include "sd.h"
+   6          #include "dac.h"
+   7          #include "readdir.h"
+   8          #include "utils.h"
+   9          #include "wav.h"
+  10          #include "itoa.h"
+  11          
+  12          //#pragma code                        // Include ASM in .LST file
+  13          void kbinit ( void );
+  14          uint8_t kbcheck ( void );
+  15          void dacinit ( void );
+  16          
+  17          extern uint8_t  xdata numSongs;      // Number of songs found
+  18          extern uint32_t xdata songSector[32];// Starting sector of each file.
+  19          
+  20          int main(void){
+  21   1      char idata foo2;
+  22   1          wav_header xdata *header_ptr;
+  23   1          uint32_t xdata current_sector = songSector[0];
+  24   1          int i = 0, ping, pong;
+  25   1          uint32_t bytestoplay, bytesread;
+  26   1          uint8_t xdata buffer[2][512];
+  27   1          char itoa_buf[4] = "\0\0\0\0";
+  28   1          char itoa_16buf[6] = "\0\0\0\0\0\0";
+  29   1          uint32_t increment = 1;
+  30   1              uint16_t tmp;
+  31   1          bit displayToggle = 0;
+  32   1          //init procedures
+  33   1          SFRPAGE = 0x0F;
+  34   1          WDTCN = 0xDE;                   // Disable watchdog timer
+  35   1          WDTCN = 0xAD;
+  36   1          OSCICN = 0xC2;
+  37   1          XBR2 |= 0x40;                   // Enable crossbar and weak pull-up
+  38   1          EA = 1;                         // Enable all interrupts
+  39   1          spi_set_divisor(0);
+  40   1          spiinit();
+  41   1          lcdinit();
+  42   1          kbinit();
+  43   1          dacinit();
+  44   1          dac2init();
+  45   1        /*  SFRPAGE = 0;
+  46   1              DACnCN = 0x9A;
+  47   1          SFRPAGE = 1;
+  48   1          DACnCN = 0x9A;*/
+  49   1          dacrate(11025);
+  50   1          dacstereo(0);                   // Set number of channels to mono
+  51   1          //dacvolume(1);
+  52   1      /*
+  53   1          while(1) {
+  54   1              uint8_t temp[1];
+  55   1              PCON |= 1;
+C51 COMPILER V7.05   MAIN                                                                  12/01/2012 03:11:18 PAGE 2   
+
+  56   1              temp[0] = kbcheck();
+  57   1              if (temp[0] == 13) {
+  58   1                  lcdclear();
+  59   1                  lcdpos(0,0);
+  60   1              }
+  61   1              else if (temp[0] == 8) {
+  62   1                  _lcdcmd(0x10);
+  63   1                  lcdwrite(" ");
+  64   1                  _lcdcmd(0x10);
+  65   1              }
+  66   1              else if (temp[0] != 255)
+  67   1                  lcdwrite(temp);
+  68   1          }
+  69   1      */
+  70   1      
+  71   1          while(1){
+  72   2              if(!spicardpresent()){
+  73   3                  lcdpos(0,0);
+  74   3                  lcdwrite("Insert microSD");
+  75   3                  lcdpos(1,0);
+  76   3                  lcdwrite("card...");    // Only write once.
+  77   3              }
+  78   2              while(!spicardpresent());   // Wait until card is detected
+  79   2              if(!microSDinit()){         // If initialization fails, print error.
+  80   3                  lcdclear();
+  81   3                  lcdpos(0,0);
+  82   3                  lcdwrite("ERROR: microSD");
+  83   3                  lcdpos(1,0);
+  84   3                  lcdwrite("failure.");
+  85   3              } else {
+  86   3                  spi_set_divisor(1);     // Set to max speed after initialisation
+  87   3                  readdir();              // Fill in numSongs and songSector[32]
+  88   3                  while(spicardpresent()){
+  89   4                      itoa8(201, itoa_buf);
+  90   4                      lcdwrite(itoa_buf);
+  91   4      
+  92   4                  
+  93   4                      PCON |= 1;          // Power management setting
+  94   4                      for(i; i<numSongs; i++){
+  95   5                          current_sector = songSector[i];
+  96   5                          microSDread(current_sector, (uint8_t *) header_ptr);
+  97   5                          switch(ntohs(header_ptr->numChannels)){
+  98   6                              case 2:
+  99   6                                  dacstereo(1); // Stereo
+ 100   6                                  break;
+ 101   6                              case 1:
+ 102   6                              default:
+ 103   6                                  dacstereo(0); // Mono
+ 104   6                                  break;
+ 105   6                          }
+ 106   5                                              tmp = ntohl(header_ptr->sampleRate);
+ 107   5                                              dacrate(tmp);
+ 108   5                          //dacrate(ntohs(header_ptr->sampleRate));
+ 109   5                          bytestoplay = ntohl(header_ptr->subchunk2Size);
+ 110   5                          lcdclear();
+ 111   5                          lcdpos(0,0);
+ 112   5                          itoa8(i, itoa_buf);
+ 113   5                          lcdwrite(itoa_buf);
+ 114   5                          lcdwrite(":");
+ 115   5                          lcdwrite(header_ptr->artist);
+ 116   5                          lcdpos(1,0);
+ 117   5                          lcdwrite(header_ptr->title);
+C51 COMPILER V7.05   MAIN                                                                  12/01/2012 03:11:18 PAGE 3   
+
+ 118   5                          if(!dacbusy()){
+ 119   6                              dacplay(404, (uint8_t xdata *)(header_ptr + 108));
+ 120   6                              //RIFF header + artist&title strings out of 512 B block
+ 121   6                          }
+ 122   5                          bytesread = 404;
+ 123   5                          bytestoplay -= 404;
+ 124   5                          ping = 0;
+ 125   5                          microSDread(current_sector + bytesread, buffer[pong]);
+ 126   5                          increment = 1;
+ 127   5                          // Well, we stop playing when bytestoplay = 0. If not, read
+ 128   5                          while(bytestoplay > 0){
+ 129   6                              if(!dacbusy()){
+ 130   7                                  if(bytestoplay >= 512){
+ 131   8                                      dacplay(512, buffer[pong]);
+ 132   8                                      ping = pong;
+ 133   8                                      pong = 1-ping;  // To keep ahead of the DAC
+ 134   8                                      bytestoplay -= 512;
+ 135   8                                      bytesread += 512;
+ 136   8                                  }else{
+ 137   8                                      dacplay(bytestoplay, buffer[pong]);
+ 138   8                                      bytestoplay = 0; // Done playing song.
+ 139   8                                  }
+ 140   7                                  microSDread(current_sector + increment, buffer[ping]);
+ 141   7                                  ++increment;
+ 142   7                                  switch(kbcheck()){
+ 143   8                                      case 'd':
+ 144   8                                      case 'D':
+ 145   8                                          lcdclear();
+ 146   8                                                                              displayToggle ^= 1;
+ 147   8                                          if(displayToggle){
+ 148   9                                              lcdwrite(header_ptr->artist);
+ 149   9                                              lcdpos(1,0);
+ 150   9                                              lcdwrite(header_ptr->title);
+ 151   9                                          }else{
+ 152   9                                              itoa16((uint16_t)ntohs(header_ptr->numChannels), itoa_16buf);
+ 153   9                                              lcdwrite(itoa_16buf);
+ 154   9                                          }
+ 155   8                                          break;
+ 156   8                                      case '+':
+ 157   8                                      case '=':
+ 158   8                                          dacvolume(1);
+ 159   8                                          break;
+ 160   8                                      case '-':
+ 161   8                                      case '_':
+ 162   8                                          dacvolume(0);
+ 163   8                                          break;
+ 164   8                                      case '>':
+ 165   8                                      case '.':
+ 166   8                                          dacbalance(0);
+ 167   8                                          break;
+ 168   8                                      case '<':
+ 169   8                                      case ',':
+ 170   8                                          dacbalance(1);
+ 171   8                                          break;
+ 172   8                                      case 'n':
+ 173   8                                      case 'N':
+ 174   8                                          ++i;
+ 175   8                                          i %= numSongs-1; //next song with wrap around
+ 176   8                                          break;
+ 177   8                                      case 'l':
+ 178   8                                      case 'L':
+ 179   8                                          --i;
+C51 COMPILER V7.05   MAIN                                                                  12/01/2012 03:11:18 PAGE 4   
+
+ 180   8                                          i %= numSongs-1; //previous song with wrap
+ 181   8                                          break;
+ 182   8                                      case '0':
+ 183   8                                      case ')':
+ 184   8                                          i = 0;
+ 185   8                                          break;
+ 186   8                                      case '1':
+ 187   8                                      case '!':
+ 188   8                                          i = 1;
+ 189   8                                          break;
+ 190   8                                      case '2':
+ 191   8                                      case '@':
+ 192   8                                          i = 2;
+ 193   8                                          break;
+ 194   8                                      case '3':
+ 195   8                                      case '#':
+ 196   8                                          i = 3;
+ 197   8                                          break;
+ 198   8                                      case '4':
+ 199   8                                      case '$':
+ 200   8                                          i = 4;
+ 201   8                                          break;
+ 202   8                                      case '5':
+ 203   8                                      case '%':
+ 204   8                                          i = 5;
+ 205   8                                          break;
+ 206   8                                      case '6':
+ 207   8                                      case '^':
+ 208   8                                          i = 6;
+ 209   8                                          break;
+ 210   8                                      case '7':
+ 211   8                                      case '&':
+ 212   8                                          i = 7;
+ 213   8                                          break;
+ 214   8                                      case '8':
+ 215   8                                      case '*':
+ 216   8                                          i = 8;
+ 217   8                                          break;
+ 218   8                                      case '9':
+ 219   8                                      case '(':
+ 220   8                                          i = 9;
+ 221   8                                          break;
+ 222   8                                      default:
+ 223   8                                          break;
+ 224   8                                  }
+ 225   7                              }
+ 226   6                          }
+ 227   5                      }
+ 228   4                  }
+ 229   3              }
+ 230   2          }
+ 231   1          return 0;
+ 232   1      }
+*** WARNING C280 IN LINE 21 OF MAIN.C: 'foo2': unreferenced local variable
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1246    ----
+   CONSTANT SIZE    =     59    ----
+   XDATA SIZE       =   ----    1028
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      30
+C51 COMPILER V7.05   MAIN                                                                  12/01/2012 03:11:18 PAGE 5   
+
+   IDATA SIZE       =   ----       1
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
