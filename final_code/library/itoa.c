@@ -23,8 +23,8 @@ void itoa8(uint8_t i, char *a) {
     switch(s) {
         MCASE(3);
         MCASE(2);
-        MCASE(1);
-        default: break;
+        default:
+            TRUNC(1);
     }
 }
 
@@ -46,7 +46,7 @@ void itoa16(uint16_t i, char *a) {
         MCASE(4);
         MCASE(3);
         MCASE(2);
-        MCASE(1);
-        default: break;
+        default:
+            TRUNC(1);
     }
 }
