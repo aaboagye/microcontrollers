@@ -34,20 +34,16 @@ void dac2init(void){
 void dacrate(uint16_t rate) {
     switch(rate){
         case 8000:
-            // RCAP2 = -128; // 0.47% percent error
-            RCAP2 = -1531;
+            RCAP2 = -128; // 0.47% percent error
             break;
         case 11025:
-            // RCAP2 = -93; // 0.64% percent error
-            RCAP2 = -1111;
+            RCAP2 = -93; // 0.64% percent error
             break;
         case 22050:
-            // RCAP2 = -46; // 0.64% percent error
-            RCAP2 = -555;
+            RCAP2 = -46; // 0.64% percent error
             break;
         default:
-            // RCAP2 = -128; /* default to 8KHz sampling */
-            RCAP2 = -1531;
+            RCAP2 = -128; /* default to 8KHz sampling */
     }
     return;
 }
@@ -107,25 +103,25 @@ void dacout(void) interrupt 5 {
     if(dacactive){
         if(bytesleft == 0){
             SFRPAGE = 0;
-            DACn = 0x0080 << 4;
+            DACn = (uint16_t)0x80 << 4;
             SFRPAGE = 1;
-            DACn = 0x0080 << 4;
+            DACn = (uint16_t)0x80 << 4;
             dacactive = 0;
         } else {
             if(isStereo){
                 //write to DAC0 data at bufptr
                 SFRPAGE = 0;
-                DACn = (uint16_t) *bufptr << 4;
+                DACn = ((uint16_t)*bufptr) << 4;
                 bufptr++;
                 SFRPAGE = 1;
-                DACn = (uint16_t) *bufptr << 4;
+                DACn = ((uint16_t)*bufptr) << 4;
                 bufptr++;
                 bytesleft--;
             } else {
                 SFRPAGE = 0;
-                DACn = (uint16_t) *bufptr << 4;
+                DACn = ((uint16_t)*bufptr) << 4;
                 SFRPAGE = 1;
-                DACn = (uint16_t) *bufptr << 4;
+                DACn = ((uint16_t)*bufptr) << 4;
                 bufptr++;
             }
             bytesleft--;

@@ -34,9 +34,8 @@ void spiinit(void){
     NSSMD1 = 0; NSSMD0 = 0; //Setting 3-wire mode.
     SPIEN = 1;              //Enable the SPI module.
     SFRPAGE = 0x0F;
-    XBR0 |= 0x03;           //Routing pins to SPI module via the crossbar.
-    XBR1 |= 0x20;           //Enabling timer 2
-    P0MDOUT |= 0x07;
+    XBR0 |= 0x02;           //Routing pins to SPI module via the crossbar.
+    P0MDOUT |= 0x05;
     P2MDOUT |= 0x02;        //Setting push-pull mode for needed pins
     SFRPAGE = 0;
     return;
@@ -88,10 +87,12 @@ uint8_t spi_rcv_byte(){
 
 //sends multiple bytes (normally a SD card sector) over the SPI bus.
 void spi_rcv_buffer(uint16_t len, uint8_t xdata *buffer){
-    int i;
+    // int i;
     spi_cs_assert();
-    for(i = 0; i < len; i++)
-        buffer[i] = spi_rcv_byte();
+    // for(i = 0; i < len; i++)
+    //     buffer[i] = spi_rcv_byte();
+    while(len--)   // ###
+        *buffer++ = spi_rcv_byte();  //### array not as efficient as pointer
     spi_cs_deassert();
     return;
 }
