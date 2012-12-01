@@ -47,8 +47,8 @@ dacinit:
             mov sfrpage,#0FH
             orl XBR1,#20H           ;setup  T2 toggle output XBR
             mov sfrpage,#0
-            mov RCAP2H,#HIGH(-128)   ;set reload value
-            mov RCAP2L,#LOW(-128)
+            mov RCAP2H,#HIGH(-1531)   ;set reload value
+            mov RCAP2L,#LOW(-1531)
             mov DAC0H,#08H
             mov DAC0L,#00H           ;not sure if we need to put this here?
             mov sfrpage,#1
