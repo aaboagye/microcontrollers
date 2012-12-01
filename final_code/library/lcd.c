@@ -73,13 +73,13 @@ void lcdwritex(uint8_t xdata *str) {
 }
 
 void lcdwritei8(uint8_t i) {
-    char* a = "\0\0\0\0";
+    char a[] = "\0\0\0\0";
     itoa8(i, a);
     lcdwrite(a);
 }
 
 void lcdwritei16(uint16_t i) {
-    char* a = "\0\0\0\0\0\0";
+    char a[] = "\0\0\0\0\0\0";
     itoa16(i, a);
     lcdwrite(a);
 }
