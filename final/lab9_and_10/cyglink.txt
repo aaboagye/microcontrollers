@@ -1,2 +1,0 @@
-"C:\Users\aaboagye\Documents\GitHub\microcontrollers\final\lab9_and_10\ref.obj",
-"C:\Users\aaboagye\Documents\GitHub\microcontrollers\final\lab9_and_10\main.obj"  TO "C:\Users\aaboagye\Documents\GitHub\microcontrollers\final\lab9_and_10\ref" RS(256) PL(68) PW(78) DATA (0X0054) XDATA (0X0285) IDATA (0X0089) 
