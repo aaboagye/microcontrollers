@@ -1,2 +1,0 @@
-"U:\microcontrollers\final_project\main\main.obj",
-"U:\microcontrollers\final_project\main\refs.obj"  TO "U:\microcontrollers\final_project\main\main" RS(256) PL(68) PW(78) data(0x005D) idata(0x0089) xdata(0x0285)  
