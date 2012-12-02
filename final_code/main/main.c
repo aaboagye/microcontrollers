@@ -20,8 +20,9 @@ void query_kb();
 extern uint8_t  xdata numSongs;       // Number of songs found
 extern uint32_t xdata songSector[32]; // Starting sector of each file.
 wav_header xdata *header_ptr;
-bit displayToggle;
+bit displayToggle, first_bit;
 uint8_t song;
+uint32_t bytestoplay;
 
 #define RESET_LCD() lcdclear(); lcdpos(0, 0)
 
@@ -31,7 +32,7 @@ int main(void){
     char idata foo;
     uint32_t xdata current_sector = songSector[0];
     int ping, pong;
-    uint32_t bytestoplay, bytesread;
+    uint32_t bytesread;
     uint8_t xdata buffer[2][512];
     uint32_t increment = 1;
     main_init();
@@ -50,50 +51,60 @@ int main(void){
             while(spicardpresent()){
                 PCON |= 1;          // Power management setting
                 for(song; song<numSongs; song++){
-                    current_sector = songSector[song];
-                    microSDread(current_sector, (uint8_t *) header_ptr);
-                    switch(ntohs(header_ptr->numChannels)){
-                        case 2:
-                            dacstereo(1); // Stereo
-                            break;
-                        case 1:
-                        default:
-                            dacstereo(0); // Mono
-                            break;
-                    }
-					dacrate(ntohl(header_ptr->sampleRate));
-                    //dacrate(ntohs(header_ptr->sampleRate));
-                    bytestoplay = ntohl(header_ptr->subchunk2Size);
-                    RESET_LCD();
-                    lcdwritei8(song);
-                    lcdwrite(":");
-                    lcdwrite(header_ptr->artist);
-                    lcdpos(1,0);
-                    lcdwrite(header_ptr->title);
-                    if(!dacbusy()){
-                        dacplay(404, (uint8_t xdata *)(header_ptr + 108));
-                        //RIFF header + artist&title strings out of 512 B block
-                    }
-                    bytesread = 404;
-                    bytestoplay -= 404;
-                    ping = 0;
-                    microSDread(current_sector + bytesread, buffer[pong]);
-                    increment = 1;
-                    // Well, we stop playing when bytestoplay = 0. If not, read
-                    while(bytestoplay > 0){
+                    if(first_bit){  // First bit of the song
+                        current_sector = songSector[song];
+                        microSDread(current_sector, (uint8_t *) header_ptr);
+                        switch(ntohs(header_ptr->numChannels)){
+                            case 2:
+                                dacstereo(1); // Stereo
+                                break;
+                            case 1:
+                            default:
+                                dacstereo(0); // Mono
+                                break;
+                        }
+    					dacrate(ntohl(header_ptr->sampleRate));
+                        //dacrate(ntohs(header_ptr->sampleRate));
+                        bytestoplay = ntohl(header_ptr->subchunk2Size);
+                        RESET_LCD();
+                        lcdwritei8(song);
+                        lcdwrite(":");
+                        lcdwrite(header_ptr->artist);
+                        lcdpos(1,0);
+                        lcdwrite(header_ptr->title);
+                        query_kb();
                         if(!dacbusy()){
-                            if(bytestoplay >= 512){
-                                dacplay(512, buffer[pong]);
-                                ping = pong;
-                                pong = 1-ping;  // To keep ahead of the DAC
-                                bytestoplay -= 512;
-                                bytesread += 512;
-                            }else{
-                                dacplay(bytestoplay, buffer[pong]);
-                                bytestoplay = 0; // Done playing song.
+                            dacplay(404, (uint8_t xdata *)(header_ptr + 108));
+                            //RIFF header + artist&title strings out of 512 B block
+                            query_kb();
+                        }
+                        bytesread = 404;
+                        bytestoplay -= 404;
+                        first_bit = 0;
+                    } else {
+                        ping = 0;
+                        microSDread(current_sector + bytesread, buffer[pong]);
+                        increment = 1;
+                        query_kb();
+                        // Well, we stop playing when bytestoplay = 0. If not, read
+                        while(bytestoplay > 0){
+                            if(!dacbusy()){
+                                if(bytestoplay >= 512){
+                                    dacplay(512, buffer[pong]);
+                                    ping = pong;
+                                    pong = 1-ping;  // To keep ahead of the DAC
+                                    bytestoplay -= 512;
+                                    bytesread += 512;
+                                    query_kb();
+                                }else{
+                                    dacplay(bytestoplay, buffer[pong]);
+                                    bytestoplay = 0; // Done playing song.
+                                    query_kb();
+                                }
+                                microSDread(current_sector + increment, buffer[ping]);
+                                ++increment;
+                                query_kb();
                             }
-                            microSDread(current_sector + increment, buffer[ping]);
-                            ++increment;
                         }
                     }
                 }
@@ -119,6 +130,7 @@ void main_init() {
     spiinit();
     spi_set_divisor(0);
     displayToggle = 0;
+    first_bit = 1;
 }
 
 void wait_for_sdcard() {
@@ -170,51 +182,75 @@ void query_kb() {
         case 'N':
             ++song;
             song %= numSongs-1; //next song with wrap around
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case 'l':
         case 'L':
             --song;
-            song %= numSongs-1; //previous song with wrap
+            song %= numSongs-1; //previous song with
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '0':
         case ')':
             song = 0;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '1':
         case '!':
             song = 1;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '2':
         case '@':
             song = 2;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '3':
         case '#':
             song = 3;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '4':
         case '$':
             song = 4;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '5':
         case '%':
             song = 5;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '6':
         case '^':
             song = 6;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '7':
         case '&':
             song = 7;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '8':
         case '*':
             song = 8;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         case '9':
         case '(':
             song = 9;
+            first_bit = 1;
+            bytestoplay = 0;
             break;
         default:
             break;
