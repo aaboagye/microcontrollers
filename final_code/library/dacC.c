@@ -94,7 +94,7 @@ void dacbalance(int8_t lr) {
     if (lr > 0) { // left++, right--
         if (volumeL < MAX_VOLUME && volumeR > MIN_VOLUME) {
             VOLUMELUP();
-            VOLUMERDOWN():
+            VOLUMERDOWN();
         }
     }
     else { // left--, right++
