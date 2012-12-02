@@ -136,11 +136,14 @@ int main(void){
                                     RESET_LCD();
 									displayToggle ^= 1;
                                     if(displayToggle){
+                                        lcdwritei8(i); lcdwrite(":");
                                         lcdwrite(header_ptr->artist);
                                         lcdpos(1,0);
                                         lcdwrite(header_ptr->title);
                                     } else {
                                         lcdwritei16((uint16_t)ntohs(header_ptr->numChannels));
+                                        lcdwritei16((uint16_t)ntohl(header_ptr->sampleRate));
+                                        lcdwrite("bps.");
                                     }
                                     break;
                                 case '+':
