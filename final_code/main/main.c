@@ -53,7 +53,7 @@ extern uint32_t xdata songSector[32]; // Starting sector of each file.
                             _lcddata(' ');              \
                             _lcdcmd(0x10);              \
                         }                               \
-                        else if (temp[0] != 255)        \
+                        else if (temp != 255)           \
                             _lcddata(temp);             \
                     } while(1)
 

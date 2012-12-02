@@ -208,11 +208,11 @@ valid_char:
         push    AR0                                 ; save R0
         mov     R0,head
         mov     @R0,kbchar                          ; ring[head] = item(kbchar)
-				inc     head
-				dec			queuesize
-				mov			A,head
+        inc     head
+        dec     queuesize
+        mov     A,head
         cjne    A,#kbdq+QUEUELEN,nowrap             ; how much is free in ring buffer
-				mov			head,#kbdq
+        mov     head,#kbdq
 nowrap:
         pop     AR0
         jmp     reset_state
