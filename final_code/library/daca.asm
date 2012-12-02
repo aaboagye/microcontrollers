@@ -14,8 +14,6 @@ $NOMOD51
 $include (c8051f120.inc)
 public bytesleft, bufptr, dacactive, dacinit, dacbusy, _dacplay
 
-
-
 dac_bits segment bit
     rseg dac_bits
 dacactive:      dbit    1
@@ -29,7 +27,7 @@ daccode segment code
     rseg daccode
 
 RATE8K      EQU   -1531
-DACNCN      EQU   9CH
+DACCFG      EQU   9CH
 TMRCFG      EQU   0AH
 
 dacinit:
@@ -37,7 +35,7 @@ dacinit:
             using 0
             mov sfrpage,#0
             clr dacactive
-            orl DAC0CN,#DACNCN         ;enable DAC and watch on T2 overflow
+            orl DAC0CN,#DACCFG         ;enable DAC and watch on T2 overflow
             mov sfrpage,#1
             orl DAC1CN,#DACNCN
             mov sfrpage,#0

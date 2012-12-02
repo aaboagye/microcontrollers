@@ -7,66 +7,60 @@
 #include "readdir.h"
 #include "utils.h"
 #include "wav.h"
-#include "itoa.h"
 
 //#pragma code                        // Include ASM in .LST file
 void kbinit ( void );
 uint8_t kbcheck ( void );
 void dacinit ( void );
 
-extern uint8_t  xdata numSongs;      // Number of songs found
-extern uint32_t xdata songSector[32];// Starting sector of each file.
+extern uint8_t  xdata numSongs;       // Number of songs found
+extern uint32_t xdata songSector[32]; // Starting sector of each file.
+
+// variable declarations
+#define DECVARS()   char idata foo;                                 \
+                    wav_header xdata *header_ptr;                   \
+                    uint32_t xdata current_sector = songSector[0];  \
+                    int i, ping, pong;                              \
+                    uint32_t bytestoplay, bytesread;                \
+                    uint8_t xdata buffer[2][512];                   \
+                    uint32_t increment = 1;                         \
+                    bit displayToggle = 0
+
+// initializations
+#define INITVARS()  SFRPAGE = 0x0F;                                 \
+                    WDTCN = 0xDE;                                   \
+                    WDTCN = 0xAD;                                   \
+                    OSCICN = 0xC2;                                  \
+                    XBR2 |= 0x40;                                   \
+                    EA = 1;                                         \
+                    spi_set_divisor(0);                             \
+                    spiinit();                                      \
+                    lcdinit();                                      \
+                    kbinit();                                       \
+                    dacinit();                                      \
+                    dac2init()
+
+#define RESET_LCD() lcdclear(); lcdpos(0, 0)
+
+// simple text editor
+#define RUN_ED()    do {                                \
+                        uint8_t temp = kbcheck();       \
+                        if (temp == 13) {               \
+                            RESET_LCD();                \
+                        }                               \
+                        else if (temp == 8) {           \
+                            _lcdcmd(0x10);              \
+                            _lcddata(' ');              \
+                            _lcdcmd(0x10);              \
+                        }                               \
+                        else if (temp[0] != 255)        \
+                            _lcddata(temp);             \
+                    } while(1)
+
 
 int main(void){
-char idata foo2;
-    wav_header xdata *header_ptr;
-    uint32_t xdata current_sector = songSector[0];
-    int i = 0, ping, pong;
-    uint32_t bytestoplay, bytesread;
-    uint8_t xdata buffer[2][512];
-    char itoa_buf[4] = "\0\0\0\0";
-    char itoa_16buf[6] = "\0\0\0\0\0\0";
-    uint32_t increment = 1;
-	uint16_t tmp;
-    bit displayToggle = 0;
-    //init procedures
-    SFRPAGE = 0x0F;
-    WDTCN = 0xDE;                   // Disable watchdog timer
-    WDTCN = 0xAD;
-    OSCICN = 0xC2;
-    XBR2 |= 0x40;                   // Enable crossbar and weak pull-up
-    EA = 1;                         // Enable all interrupts
-    spi_set_divisor(0);
-    spiinit();
-    lcdinit();
-    kbinit();
-    dacinit();
-    dac2init();
-  /*  SFRPAGE = 0;
-	DACnCN = 0x9A;
-    SFRPAGE = 1;
-    DACnCN = 0x9A;*/
-    dacrate(11025);
-    dacstereo(0);                   // Set number of channels to mono
-    //dacvolume(1);
-/*
-    while(1) {
-        uint8_t temp[1];
-        PCON |= 1;
-        temp[0] = kbcheck();
-        if (temp[0] == 13) {
-            lcdclear();
-            lcdpos(0,0);
-        }
-        else if (temp[0] == 8) {
-            _lcdcmd(0x10);
-            lcdwrite(" ");
-            _lcdcmd(0x10);
-        }
-        else if (temp[0] != 255)
-            lcdwrite(temp);
-    }
-*/
+    DECVARS();
+    INITVARS();
 
     while(1){
         if(!spicardpresent()){
@@ -77,8 +71,7 @@ char idata foo2;
         }
         while(!spicardpresent());   // Wait until card is detected
         if(!microSDinit()){         // If initialization fails, print error.
-            lcdclear();
-            lcdpos(0,0);
+            RESET_LCD();
             lcdwrite("ERROR: microSD");
             lcdpos(1,0);
             lcdwrite("failure.");
@@ -86,8 +79,7 @@ char idata foo2;
             spi_set_divisor(1);     // Set to max speed after initialisation
             readdir();              // Fill in numSongs and songSector[32]
             while(spicardpresent()){
-                itoa8(201, itoa_buf);
-                lcdwrite(itoa_buf);
+
 
             
                 PCON |= 1;          // Power management setting
@@ -103,14 +95,11 @@ char idata foo2;
                             dacstereo(0); // Mono
                             break;
                     }
-					tmp = ntohl(header_ptr->sampleRate);
-					dacrate(tmp);
+					dacrate(ntohl(header_ptr->sampleRate));
                     //dacrate(ntohs(header_ptr->sampleRate));
                     bytestoplay = ntohl(header_ptr->subchunk2Size);
-                    lcdclear();
-                    lcdpos(0,0);
-                    itoa8(i, itoa_buf);
-                    lcdwrite(itoa_buf);
+                    RESET_LCD();
+                    lcdwritei8(i);
                     lcdwrite(":");
                     lcdwrite(header_ptr->artist);
                     lcdpos(1,0);
@@ -142,15 +131,14 @@ char idata foo2;
                             switch(kbcheck()){
                                 case 'd':
                                 case 'D':
-                                    lcdclear();
+                                    RESET_LCD();
 									displayToggle ^= 1;
                                     if(displayToggle){
                                         lcdwrite(header_ptr->artist);
                                         lcdpos(1,0);
                                         lcdwrite(header_ptr->title);
-                                    }else{
-                                        itoa16((uint16_t)ntohs(header_ptr->numChannels), itoa_16buf);
-                                        lcdwrite(itoa_16buf);
+                                    } else {
+                                        lcdwritei16((uint16_t)ntohs(header_ptr->numChannels));
                                     }
                                     break;
                                 case '+':
