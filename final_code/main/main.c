@@ -16,74 +16,34 @@ void dacinit ( void );
 extern uint8_t  xdata numSongs;       // Number of songs found
 extern uint32_t xdata songSector[32]; // Starting sector of each file.
 
-// variable declarations
-#define DECVARS()   char idata foo;                                 \
-                    wav_header xdata *header_ptr;                   \
-                    uint32_t xdata current_sector = songSector[0];  \
-                    int i, ping, pong;                              \
-                    uint32_t bytestoplay, bytesread;                \
-                    uint8_t xdata buffer[2][512];                   \
-                    uint32_t increment = 1;                         \
-                    bit displayToggle = 0
-
-// initializations
-#define INITVARS()  SFRPAGE = 0x0F;                                 \
-                    WDTCN = 0xDE;                                   \
-                    WDTCN = 0xAD;                                   \
-                    XBR2 |= 0x40;                                   \
-                    XBR1 |= 0x20;                                   \
-                    XBR0 |= 0x03;                                   \
-                    OSCICN = 0xC2;                                  \
-                    EA = 1;                                         \
-                    kbinit();                                       \
-                    dacinit();                                      \
-                    dac2init();                                     \
-                    lcdinit();                                      \
-                    spiinit();                                      \
-                    spi_set_divisor(0)
-
 #define RESET_LCD() lcdclear(); lcdpos(0, 0)
-
-// simple text editor
-#define RUN_ED()    do {                                \
-                        uint8_t temp = kbcheck();       \
-                        if (temp == 13) {               \
-                            RESET_LCD();                \
-                        }                               \
-                        else if (temp == 8) {           \
-                            _lcdcmd(0x10);              \
-                            _lcddata(' ');              \
-                            _lcdcmd(0x10);              \
-                        }                               \
-                        else if (temp != 255)           \
-                            _lcddata(temp);             \
-                    } while(1)
 
 
 int main(void){
-    DECVARS();
-    INITVARS();
+    // variable declarations
+    char idata foo;
+    wav_header xdata *header_ptr;
+    uint32_t xdata current_sector = songSector[0];
+    int i, ping, pong;
+    uint32_t bytestoplay, bytesread;
+    uint8_t xdata buffer[2][512];
+    uint32_t increment = 1;
+    bit displayToggle = 0;
+
+    main_init();
 
     while(1){
-        if(!spicardpresent()){
-            lcdpos(0,0);
-            lcdwrite("Insert microSD");
-            lcdpos(1,0);
-            lcdwrite("card...");    // Only write once.
-        }
-        while(!spicardpresent());   // Wait until card is detected
+        wait_for_sdcard();
+
         if(!microSDinit()){         // If initialization fails, print error.
             RESET_LCD();
             lcdwrite("ERROR: microSD");
-            lcdpos(1,0);
+            lcdpos(1, 0);
             lcdwrite("failure.");
         } else {
             spi_set_divisor(1);     // Set to max speed after initialisation
             readdir();              // Fill in numSongs and songSector[32]
             while(spicardpresent()){
-
-
-
                 PCON |= 1;          // Power management setting
                 for(i; i<numSongs; i++){
                     current_sector = songSector[i];
@@ -130,88 +90,7 @@ int main(void){
                             }
                             microSDread(current_sector + increment, buffer[ping]);
                             ++increment;
-                            switch(kbcheck()){
-                                case 'd':
-                                case 'D':
-                                    RESET_LCD();
-									displayToggle ^= 1;
-                                    if(displayToggle){
-                                        lcdwrite(header_ptr->artist);
-                                        lcdpos(1,0);
-                                        lcdwrite(header_ptr->title);
-                                    } else {
-                                        lcdwritei16((uint16_t)ntohs(header_ptr->numChannels));
-                                    }
-                                    break;
-                                case '+':
-                                case '=':
-                                    dacvolume(1);
-                                    break;
-                                case '-':
-                                case '_':
-                                    dacvolume(0);
-                                    break;
-                                case '>':
-                                case '.':
-                                    dacbalance(0);
-                                    break;
-                                case '<':
-                                case ',':
-                                    dacbalance(1);
-                                    break;
-                                case 'n':
-                                case 'N':
-                                    ++i;
-                                    i %= numSongs-1; //next song with wrap around
-                                    break;
-                                case 'l':
-                                case 'L':
-                                    --i;
-                                    i %= numSongs-1; //previous song with wrap
-                                    break;
-                                case '0':
-                                case ')':
-                                    i = 0;
-                                    break;
-                                case '1':
-                                case '!':
-                                    i = 1;
-                                    break;
-                                case '2':
-                                case '@':
-                                    i = 2;
-                                    break;
-                                case '3':
-                                case '#':
-                                    i = 3;
-                                    break;
-                                case '4':
-                                case '$':
-                                    i = 4;
-                                    break;
-                                case '5':
-                                case '%':
-                                    i = 5;
-                                    break;
-                                case '6':
-                                case '^':
-                                    i = 6;
-                                    break;
-                                case '7':
-                                case '&':
-                                    i = 7;
-                                    break;
-                                case '8':
-                                case '*':
-                                    i = 8;
-                                    break;
-                                case '9':
-                                case '(':
-                                    i = 9;
-                                    break;
-                                default:
-                                    break;
-                            }
+                            
                         }
                     }
                 }
@@ -219,4 +98,139 @@ int main(void){
         }
     }
     return 0;
+}
+
+void main_init() {
+    SFRPAGE = 0x0F;
+    WDTCN = 0xDE;
+    WDTCN = 0xAD;
+    XBR2 |= 0x40;
+    XBR1 |= 0x20;
+    XBR0 |= 0x03;
+    OSCICN = 0xC2;
+    EA = 1;
+    kbinit();
+    dacinit();
+    dac2init();
+    lcdinit();
+    spiinit();
+    spi_set_divisor(0);
+}
+
+void wait_for_sdcard() {
+    if(!spicardpresent()){
+            lcdpos(0,0);
+            lcdwrite("Insert microSD");
+            lcdpos(1,0);
+            lcdwrite("card...");    // Only write once.
+        }
+
+    while(!spicardpresent());   // Wait until card is detected
+}
+
+void query_kb() {
+    switch(kbcheck()){
+        case 'd':
+        case 'D':
+            RESET_LCD();
+            displayToggle ^= 1;
+            if(displayToggle){
+                lcdwrite(header_ptr->artist);
+                lcdpos(1,0);
+                lcdwrite(header_ptr->title);
+            } else {
+                lcdwritei16((uint16_t)ntohs(header_ptr->numChannels));
+            }
+            break;
+        case '+':
+        case '=':
+            dacvolume(1);
+            break;
+        case '-':
+        case '_':
+            dacvolume(0);
+            break;
+        case '>':
+        case '.':
+            dacbalance(0);
+            break;
+        case '<':
+        case ',':
+            dacbalance(1);
+            break;
+        case 'n':
+        case 'N':
+            ++i;
+            i %= numSongs-1; //next song with wrap around
+            break;
+        case 'l':
+        case 'L':
+            --i;
+            i %= numSongs-1; //previous song with wrap
+            break;
+        case '0':
+        case ')':
+            i = 0;
+            break;
+        case '1':
+        case '!':
+            i = 1;
+            break;
+        case '2':
+        case '@':
+            i = 2;
+            break;
+        case '3':
+        case '#':
+            i = 3;
+            break;
+        case '4':
+        case '$':
+            i = 4;
+            break;
+        case '5':
+        case '%':
+            i = 5;
+            break;
+        case '6':
+        case '^':
+            i = 6;
+            break;
+        case '7':
+        case '&':
+            i = 7;
+            break;
+        case '8':
+        case '*':
+            i = 8;
+            break;
+        case '9':
+        case '(':
+            i = 9;
+            break;
+        default:
+            break;
+    }
+}
+
+
+void run_ed(char *buffer, uint8_t size) {
+    uint8_t temp;
+    uint8_t i = 0;
+
+    do {
+        temp = kbcheck();
+        if (temp == 8 && i > 0) {
+            _lcdcmd(0x10);
+            _lcddata(' ');
+            _lcdcmd(0x10);
+            buffer[--i] = temp;
+        }
+        else if (temp != 255 && i < size) {
+            buffer[i++] = temp;
+            _lcddata(temp);
+        }
+    } while(temp != 13);
+
+    RESET_LCD();
 }
