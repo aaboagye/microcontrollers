@@ -37,7 +37,7 @@ dacinit:
             clr dacactive
             orl DAC0CN,#DACCFG         ;enable DAC and watch on T2 overflow
             mov sfrpage,#1
-            orl DAC1CN,#DACNCN
+            orl DAC1CN,#DACCFG
             mov sfrpage,#0
             setb ET2                ;setup T2 interrupt
             orl P1MDOUT,#40H        ;fixes "shark-fin" square wave
