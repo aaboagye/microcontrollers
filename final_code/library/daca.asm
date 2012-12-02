@@ -28,16 +28,18 @@ bufptr:         ds      2
 daccode segment code
     rseg daccode
 
-RATE8K      EQU   -128
+RATE8K      EQU   -1531
+DACNCN      EQU   9CH
+TMRCFG      EQU   0AH
 
 dacinit:
 ;;initialise global vars
             using 0
             mov sfrpage,#0
             clr dacactive
-            orl DAC0CN,#9CH         ;enable DAC and watch on T2 overflow
+            orl DAC0CN,#DACNCN         ;enable DAC and watch on T2 overflow
             mov sfrpage,#1
-            orl DAC1CN,#9CH
+            orl DAC1CN,#DACNCN
             mov sfrpage,#0
             setb ET2                ;setup T2 interrupt
             orl P1MDOUT,#40H        ;fixes "shark-fin" square wave
@@ -45,7 +47,7 @@ dacinit:
             setb PT2
             clr TF2
             setb TR2
-            orl TMR2CF,#02H
+            orl TMR2CF,#TMRCFG
             mov sfrpage,#0FH
             orl XBR1,#20H           ;setup  T2 toggle output XBR
             mov sfrpage,#0
