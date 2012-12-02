@@ -25,6 +25,7 @@ uint8_t song;
 
 #define RESET_LCD() lcdclear(); lcdpos(0, 0)
 
+#define EDITOR 0
 
 int main(void){
     // variable declarations
@@ -220,7 +221,8 @@ void query_kb() {
             break;
     }
 }
-/*
+
+#if EDITOR
 void run_ed(char *buffer, uint8_t size) {
     uint8_t temp;
     uint8_t i = 0;
@@ -240,4 +242,5 @@ void run_ed(char *buffer, uint8_t size) {
     } while(temp != 13);
 
     RESET_LCD();
-}*/
+}
+#endif
