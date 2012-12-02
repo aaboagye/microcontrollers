@@ -35,12 +35,12 @@ extern uint32_t xdata songSector[32]; // Starting sector of each file.
                     XBR0 |= 0x03;                                   \
                     OSCICN = 0xC2;                                  \
                     EA = 1;                                         \
-                    spi_set_divisor(0);                             \
-                    spiinit();                                      \
-                    lcdinit();                                      \
                     kbinit();                                       \
                     dacinit();                                      \
-                    dac2init()
+                    dac2init();                                     \
+                    lcdinit();                                      \
+                    spiinit();                                      \
+                    spi_set_divisor(0)
 
 #define RESET_LCD() lcdclear(); lcdpos(0, 0)
 
@@ -83,7 +83,7 @@ int main(void){
             while(spicardpresent()){
 
 
-            
+
                 PCON |= 1;          // Power management setting
                 for(i; i<numSongs; i++){
                     current_sector = songSector[i];
