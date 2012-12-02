@@ -20,7 +20,6 @@ void query_kb();
 extern uint8_t  xdata numSongs;       // Number of songs found
 extern uint32_t xdata songSector[32]; // Starting sector of each file.
 wav_header xdata *header_ptr;
-bit displayToggle;
 uint8_t song;
 
 #define RESET_LCD() lcdclear(); lcdpos(0, 0)
@@ -30,74 +29,20 @@ uint8_t song;
 int main(void){
     // variable declarations
     char idata foo;
-    uint32_t xdata current_sector = songSector[0];
-    int ping, pong;
-    uint32_t bytestoplay, bytesread;
-    uint8_t xdata buffer[2][512];
-    uint32_t increment = 1;
     main_init();
 
     while(1){
         wait_for_sdcard();
 
         if(!microSDinit()){         // If initialization fails, print error.
-            RESET_LCD();
-            lcdwrite("ERROR: microSD");
-            lcdpos(1, 0);
-            lcdwrite("failure.");
+            microSD_error();
         } else {
             spi_set_divisor(1);     // Set to max speed after initialisation
             readdir();              // Fill in numSongs and songSector[32]
             while(spicardpresent()){
                 PCON |= 1;          // Power management setting
-                for(song; song<numSongs; song++){
-                    current_sector = songSector[song];
-                    microSDread(current_sector, (uint8_t *) header_ptr);
-                    switch(ntohs(header_ptr->numChannels)){
-                        case 2:
-                            dacstereo(1); // Stereo
-                            break;
-                        case 1:
-                        default:
-                            dacstereo(0); // Mono
-                            break;
-                    }
-					dacrate(ntohl(header_ptr->sampleRate));
-                    //dacrate(ntohs(header_ptr->sampleRate));
-                    bytestoplay = ntohl(header_ptr->subchunk2Size);
-                    RESET_LCD();
-                    lcdwritei8(song);
-                    lcdwrite(":");
-                    lcdwrite(header_ptr->artist);
-                    lcdpos(1,0);
-                    lcdwrite(header_ptr->title);
-                    if(!dacbusy()){
-                        dacplay(404, (uint8_t xdata *)(header_ptr + 108));
-                        //RIFF header + artist&title strings out of 512 B block
-                    }
-                    bytesread = 404;
-                    bytestoplay -= 404;
-                    ping = 0;
-                    microSDread(current_sector + bytesread, buffer[pong]);
-                    increment = 1;
-                    // Well, we stop playing when bytestoplay = 0. If not, read
-                    while(bytestoplay > 0){
-                        if(!dacbusy()){
-                            if(bytestoplay >= 512){
-                                dacplay(512, buffer[pong]);
-                                ping = pong;
-                                pong = 1-ping;  // To keep ahead of the DAC
-                                bytestoplay -= 512;
-                                bytesread += 512;
-                            }else{
-                                dacplay(bytestoplay, buffer[pong]);
-                                bytestoplay = 0; // Done playing song.
-                            }
-                            microSDread(current_sector + increment, buffer[ping]);
-                            ++increment;
-                        }
-                    }
-                }
+                show_track_name();
+                play_song()
             }
         }
     }
@@ -119,7 +64,76 @@ void main_init() {
     lcdinit();
     spiinit();
     spi_set_divisor(0);
-    displayToggle = 0;
+}
+
+void set_song(uint8_t song_num) {
+    song = song_num;
+    microSDread(songSector[song], (uint8_t *) header_ptr);
+
+    // set stereo/mono
+    switch(ntohs(header_ptr->numChannels)){
+        case 2:
+            dacstereo(1); // Stereo
+            break;
+        case 1:
+        default:
+            dacstereo(0); // Mono
+            break;
+    }
+
+    // set sample rate
+    dacrate(ntohl(header_ptr->sampleRate));
+}
+
+void play_song() {
+    static int ping, pong;
+    static uint32_t bytestoplay;
+    static uint8_t xdata buffer[2][512];
+    static uint32_t increment;
+    static uint8_t mysong = -1;
+
+    // if it's a new song
+    if (mysong != song) {
+        bytestoplay = ntohl(header_ptr->subchunk2Size) - 404;
+        increment = 0;
+        ping = 0;
+        pong = 1;
+
+        if(!dacbusy()){
+            //RIFF header + artist&title strings out of 512 B block
+            dacplay(404, (uint8_t xdata *)(header_ptr + 108));
+            mysong = song;
+            microSDread(songSector[mysong] + (++increment), buffer[ping]);
+        }
+    }
+    else {
+        if(!dacbusy()){
+            ping = pong;
+            pong = 1-ping;  // To keep ahead of the DAC
+            if(bytestoplay >= 512){
+                dacplay(512, buffer[pong]);
+                bytestoplay -= 512;
+                microSDread(songSector[mysong] + (++increment), buffer[ping]);
+            }else{
+                dacplay(bytestoplay, buffer[pong]);
+                bytestoplay = 0; // Done playing song.
+                set_song(get_next_song());
+            }
+        }
+    }
+}
+
+void get_next_song() {
+    return (++song) % numSongs;
+}
+
+void show_track_name() {
+    RESET_LCD();
+    lcdwritei8(song);
+    lcdwrite(":");
+    lcdwrite(header_ptr->artist);
+    lcdpos(1,0);
+    lcdwrite(header_ptr->title);
 }
 
 void wait_for_sdcard() {
@@ -131,6 +145,13 @@ void wait_for_sdcard() {
         }
 
     while(!spicardpresent());   // Wait until card is detected
+}
+
+void microSD_error() {
+    RESET_LCD();
+    lcdwrite("ERROR: microSD");
+    lcdpos(1, 0);
+    lcdwrite("failure.");
 }
 
 void query_kb() {
