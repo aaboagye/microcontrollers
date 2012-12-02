@@ -30,8 +30,10 @@ extern uint32_t xdata songSector[32]; // Starting sector of each file.
 #define INITVARS()  SFRPAGE = 0x0F;                                 \
                     WDTCN = 0xDE;                                   \
                     WDTCN = 0xAD;                                   \
-                    OSCICN = 0xC2;                                  \
                     XBR2 |= 0x40;                                   \
+                    XBR1 |= 0x20;                                   \
+                    XBR0 |= 0x03;                                   \
+                    OSCICN = 0xC2;                                  \
                     EA = 1;                                         \
                     spi_set_divisor(0);                             \
                     spiinit();                                      \
