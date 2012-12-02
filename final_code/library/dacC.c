@@ -24,6 +24,26 @@ bit isStereo;
 int8_t volumeL;
 int8_t volumeR;
 
+// SFRs: 16-bit little endian. SFRL and SFRH
+sfr16 RCAP2  = 0xCA;
+sfr16 DACnCN = 0xD4; // DAC0: SFRPAGE 0, DAC1: SFRPAGE 1
+sfr16 DACn   = 0xD2;
+
+#define MAX_VOLUME 5
+#define MIN_VOLUME 0
+
+#define RATE8K  -128
+#define RATE11K -93
+#define RATE22K -46
+
+#define VOLUMELUP()     do { volumeL++; SFRPAGE=0; DACnCN--; } while(0)
+#define VOLUMERUP()     do { volumeR++; SFRPAGE=1; DACnCN--; } while(0)
+#define VOLUMELDOWN()   do { volumeL--; SFRPAGE=0; DACnCN++; } while(0)
+#define VOLUMERDOWN()   do { volumeR--; SFRPAGE=1; DACnCN++; } while(0)
+
+#define SETL(data)      do { SFRPAGE=0; DACn=(((uint16_t)(data)) << 4);  } while(0)
+#define SETR(data)      do { SFRPAGE=1; DACn=(((uint16_t)(data)) << 4);  } while(0)
+
 void dac2init(void){
 /*  initalizes any global variables used. */
     isStereo = 0;
@@ -34,16 +54,16 @@ void dac2init(void){
 void dacrate(uint16_t rate) {
     switch(rate){
         case 8000:
-            RCAP2 = -128; // 0.47% percent error
+            RCAP2 = RATE8K; // 0.47% percent error
             break;
         case 11025:
-            RCAP2 = -93; // 0.64% percent error
+            RCAP2 = RATE11K; // 0.64% percent error
             break;
         case 22050:
-            RCAP2 = -46; // 0.64% percent error
+            RCAP2 = RATE22K; // 0.64% percent error
             break;
         default:
-            RCAP2 = -128; /* default to 8KHz sampling */
+            RCAP2 = RATE8K; /* default to 8KHz sampling */
     }
     return;
 }
@@ -57,21 +77,15 @@ void dacvolume(int8_t ud) {
     if (ud > 0) {
       //increase volume
         if (volumeL < MAX_VOLUME && volumeR < MAX_VOLUME) {
-            volumeL++; volumeR++;
-            SFRPAGE = 0;
-            DACnCN--;
-            SFRPAGE = 1;
-            DACnCN--;
+            VOLUMELUP();
+            VOLUMERUP();
         }
     }
     else {
       //decrease volume
         if(volumeL > MIN_VOLUME && volumeR > MIN_VOLUME){
-            volumeL--; volumeR--;
-            SFRPAGE = 0;
-            DACnCN++;
-            SFRPAGE = 1;
-            DACnCN++;
+            VOLUMELDOWN();
+            VOLUMERDOWN();
         }
     }
 }
@@ -79,20 +93,14 @@ void dacvolume(int8_t ud) {
 void dacbalance(int8_t lr) {
     if (lr > 0) { // left++, right--
         if (volumeL < MAX_VOLUME && volumeR > MIN_VOLUME) {
-            volumeL++; volumeR--;
-            SFRPAGE = 0;
-            DACnCN--;
-            SFRPAGE = 1;
-            DACnCN++;
+            VOLUMELUP();
+            VOLUMERDOWN():
         }
     }
     else { // left--, right++
         if(volumeL > MIN_VOLUME && volumeR < MAX_VOLUME){
-            volumeL--; volumeR++;
-            SFRPAGE = 0;
-            DACnCN++;
-            SFRPAGE = 1;
-            DACnCN--;
+            VOLUMELDOWN();
+            VOLUMERUP();
         }
     }
 }
@@ -102,26 +110,20 @@ void dacout(void) interrupt 5 {
     //puts bytes in buffer to be played
     if(dacactive){
         if(bytesleft == 0){
-            SFRPAGE = 0;
-            DACn = (uint16_t)0x80 << 4;
-            SFRPAGE = 1;
-            DACn = (uint16_t)0x80 << 4;
+            SETL(0x80);
+            SETR(0x80);
             dacactive = 0;
         } else {
             if(isStereo){
                 //write to DAC0 data at bufptr
-                SFRPAGE = 0;
-                DACn = ((uint16_t)*bufptr) << 4;
+                SETL(*bufptr);
                 bufptr++;
-                SFRPAGE = 1;
-                DACn = ((uint16_t)*bufptr) << 4;
+                SETR(*bufptr);
                 bufptr++;
                 bytesleft--;
             } else {
-                SFRPAGE = 0;
-                DACn = ((uint16_t)*bufptr) << 4;
-                SFRPAGE = 1;
-                DACn = ((uint16_t)*bufptr) << 4;
+                SETL(*bufptr);
+                SETR(*bufptr);
                 bufptr++;
             }
             bytesleft--;
