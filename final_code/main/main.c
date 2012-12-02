@@ -21,6 +21,7 @@ extern uint8_t  xdata numSongs;       // Number of songs found
 extern uint32_t xdata songSector[32]; // Starting sector of each file.
 wav_header xdata *header_ptr;
 uint8_t song;
+bit paused;
 
 #define RESET_LCD() lcdclear(); lcdpos(0, 0)
 
@@ -41,8 +42,8 @@ int main(void){
             readdir();              // Fill in numSongs and songSector[32]
             while(spicardpresent()){
                 PCON |= 1;          // Power management setting
-                show_track_name();
-                play_song()
+                play_song();
+                query_kb();
             }
         }
     }
@@ -92,6 +93,10 @@ void play_song() {
     static uint32_t increment;
     static uint8_t mysong = -1;
 
+    if (paused) {
+        return;
+    }
+
     // if it's a new song
     if (mysong != song) {
         bytestoplay = ntohl(header_ptr->subchunk2Size) - 404;
@@ -103,6 +108,7 @@ void play_song() {
             //RIFF header + artist&title strings out of 512 B block
             dacplay(404, (uint8_t xdata *)(header_ptr + 108));
             mysong = song;
+            show_track_name();
             microSDread(songSector[mysong] + (++increment), buffer[ping]);
         }
     }
@@ -117,13 +123,20 @@ void play_song() {
             }else{
                 dacplay(bytestoplay, buffer[pong]);
                 bytestoplay = 0; // Done playing song.
-                set_song(get_next_song());
+                set_song(get_next_song(0));
             }
         }
     }
 }
 
-void get_next_song() {
+void get_next_song(uint8_t back) {
+    if (back) {
+        // loop around
+        if (!song) {
+            return numSongs - 1;
+        }
+        return (--song) % numSongs;
+    }
     return (++song) % numSongs;
 }
 
@@ -154,22 +167,37 @@ void microSD_error() {
     lcdwrite("failure.");
 }
 
+void displaySongInfo() {
+    RESET_LCD();
+    lcdwritei8(song); lcdwrite(":");
+    lcdwrite(header_ptr->artist);
+    lcdpos(1,0);
+    lcdwrite(header_ptr->title);
+}
+
+void displayRateInfo() {
+    RESET_LCD();
+    lcdwritei16((uint16_t)ntohs(header_ptr->numChannels));
+    lcdwrite(" ch");
+    lcdpos(1,0);
+    lcdwritei16((uint16_t)ntohl(header_ptr->sampleRate));
+    lcdwrite(" bps.");
+}
+
 void query_kb() {
+    static bit displayToggle = 0;
+
     switch(kbcheck()){
+        case ' ':
+            paused ^= 1;
+            break;
         case 'd':
         case 'D':
-            RESET_LCD();
             displayToggle ^= 1;
             if(displayToggle){
-                lcdwritei8(song); lcdwrite(":");
-                lcdwrite(header_ptr->artist);
-                lcdpos(1,0);
-                lcdwrite(header_ptr->title);
+                displaySongInfo();
             } else {
-                lcdwritei16((uint16_t)ntohs(header_ptr->numChannels));
-                lcdpos(1,0);
-                lcdwritei16((uint16_t)ntohl(header_ptr->sampleRate));
-                lcdwrite(" bps.");
+                displayRateInfo();
             }
             break;
         case '+':
@@ -190,53 +218,51 @@ void query_kb() {
             break;
         case 'n':
         case 'N':
-            ++song;
-            song %= numSongs-1; //next song with wrap around
+            get_next_song(0);
             break;
         case 'l':
         case 'L':
-            --song;
-            song %= numSongs-1; //previous song with wrap
+            get_next_song(1);
             break;
         case '0':
         case ')':
-            song = 0;
+            set_song(0);
             break;
         case '1':
         case '!':
-            song = 1;
+            set_song(1);
             break;
         case '2':
         case '@':
-            song = 2;
+            set_song(2);
             break;
         case '3':
         case '#':
-            song = 3;
+            set_song(3);
             break;
         case '4':
         case '$':
-            song = 4;
+            set_song(4);
             break;
         case '5':
         case '%':
-            song = 5;
+            set_song(5);
             break;
         case '6':
         case '^':
-            song = 6;
+            set_song(6);
             break;
         case '7':
         case '&':
-            song = 7;
+            set_song(7);
             break;
         case '8':
         case '*':
-            song = 8;
+            set_song(8);
             break;
         case '9':
         case '(':
-            song = 9;
+            set_song(9);
             break;
         default:
             break;
