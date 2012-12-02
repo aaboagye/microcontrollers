@@ -8,14 +8,30 @@
 #include "utils.h"
 #include "wav.h"
 
+#define RESET_LCD() lcdclear(); lcdpos(0, 0)
+
+#define EDITOR 0
+
 //#pragma code                        // Include ASM in .LST file
 void kbinit ( void );
 uint8_t kbcheck ( void );
 void dacinit ( void );
-//void run_ed(char *buffer, uint8_t size);
-void wait_for_sdcard();
+
+// make it easy
 void main_init();
+void set_song(uint8_t song_num);
+void play_song();
+void get_next_song(uint8_t back);
+void show_track_name();
+void wait_for_sdcard();
+void microSD_error();
+void displaySongInfo();
+void displayRateInfo();
 void query_kb();
+
+#if EDITOR
+void run_ed(char *buffer, uint8_t size);
+#endif
 
 extern uint8_t  xdata numSongs;       // Number of songs found
 extern uint32_t xdata songSector[32]; // Starting sector of each file.
@@ -23,9 +39,6 @@ wav_header xdata *header_ptr;
 uint8_t song;
 bit paused;
 
-#define RESET_LCD() lcdclear(); lcdpos(0, 0)
-
-#define EDITOR 0
 
 int main(void){
     // variable declarations
