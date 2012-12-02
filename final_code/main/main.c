@@ -12,9 +12,16 @@
 void kbinit ( void );
 uint8_t kbcheck ( void );
 void dacinit ( void );
+//void run_ed(char *buffer, uint8_t size);
+void wait_for_sdcard();
+void main_init();
+void query_kb();
 
 extern uint8_t  xdata numSongs;       // Number of songs found
 extern uint32_t xdata songSector[32]; // Starting sector of each file.
+wav_header xdata *header_ptr;
+bit displayToggle;
+uint8_t song;
 
 #define RESET_LCD() lcdclear(); lcdpos(0, 0)
 
@@ -22,14 +29,11 @@ extern uint32_t xdata songSector[32]; // Starting sector of each file.
 int main(void){
     // variable declarations
     char idata foo;
-    wav_header xdata *header_ptr;
     uint32_t xdata current_sector = songSector[0];
-    int i, ping, pong;
+    int ping, pong;
     uint32_t bytestoplay, bytesread;
     uint8_t xdata buffer[2][512];
     uint32_t increment = 1;
-    bit displayToggle = 0;
-
     main_init();
 
     while(1){
@@ -45,8 +49,8 @@ int main(void){
             readdir();              // Fill in numSongs and songSector[32]
             while(spicardpresent()){
                 PCON |= 1;          // Power management setting
-                for(i; i<numSongs; i++){
-                    current_sector = songSector[i];
+                for(song; song<numSongs; song++){
+                    current_sector = songSector[song];
                     microSDread(current_sector, (uint8_t *) header_ptr);
                     switch(ntohs(header_ptr->numChannels)){
                         case 2:
@@ -61,7 +65,7 @@ int main(void){
                     //dacrate(ntohs(header_ptr->sampleRate));
                     bytestoplay = ntohl(header_ptr->subchunk2Size);
                     RESET_LCD();
-                    lcdwritei8(i);
+                    lcdwritei8(song);
                     lcdwrite(":");
                     lcdwrite(header_ptr->artist);
                     lcdpos(1,0);
@@ -114,6 +118,7 @@ void main_init() {
     lcdinit();
     spiinit();
     spi_set_divisor(0);
+    displayToggle = 0;
 }
 
 void wait_for_sdcard() {
@@ -134,7 +139,7 @@ void query_kb() {
             RESET_LCD();
             displayToggle ^= 1;
             if(displayToggle){
-                lcdwritei8(i); lcdwrite(":");
+                lcdwritei8(song); lcdwrite(":");
                 lcdwrite(header_ptr->artist);
                 lcdpos(1,0);
                 lcdwrite(header_ptr->title);
@@ -163,60 +168,59 @@ void query_kb() {
             break;
         case 'n':
         case 'N':
-            ++i;
-            i %= numSongs-1; //next song with wrap around
+            ++song;
+            song %= numSongs-1; //next song with wrap around
             break;
         case 'l':
         case 'L':
-            --i;
-            i %= numSongs-1; //previous song with wrap
+            --song;
+            song %= numSongs-1; //previous song with wrap
             break;
         case '0':
         case ')':
-            i = 0;
+            song = 0;
             break;
         case '1':
         case '!':
-            i = 1;
+            song = 1;
             break;
         case '2':
         case '@':
-            i = 2;
+            song = 2;
             break;
         case '3':
         case '#':
-            i = 3;
+            song = 3;
             break;
         case '4':
         case '$':
-            i = 4;
+            song = 4;
             break;
         case '5':
         case '%':
-            i = 5;
+            song = 5;
             break;
         case '6':
         case '^':
-            i = 6;
+            song = 6;
             break;
         case '7':
         case '&':
-            i = 7;
+            song = 7;
             break;
         case '8':
         case '*':
-            i = 8;
+            song = 8;
             break;
         case '9':
         case '(':
-            i = 9;
+            song = 9;
             break;
         default:
             break;
     }
 }
-
-
+/*
 void run_ed(char *buffer, uint8_t size) {
     uint8_t temp;
     uint8_t i = 0;
@@ -236,4 +240,4 @@ void run_ed(char *buffer, uint8_t size) {
     } while(temp != 13);
 
     RESET_LCD();
-}
+}*/
